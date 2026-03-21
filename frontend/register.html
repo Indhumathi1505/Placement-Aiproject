@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (token && editRequested) {
     try {
-      const resp = await fetch('http://localhost:8080/api/students/me', {
+      const resp = await fetch(window.PLACE_IQ_API_URL + '/api/students/me', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (resp.ok) {
@@ -551,7 +551,7 @@ async function handleSubmit(e) {
     let data;
     const token = localStorage.getItem('token');
     if (isEditMode) {
-      const resp = await fetch(`http://localhost:8080/api/students/${currentStudentId}`, {
+      const resp = await fetch(window.PLACE_IQ_API_URL + `/api/students/${currentStudentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(payload)
@@ -566,7 +566,7 @@ async function handleSubmit(e) {
       
       // refresh prediction
       try {
-         await fetch(`http://localhost:8080/api/students/${currentStudentId}/prediction/refresh`, {
+         await fetch(window.PLACE_IQ_API_URL + `/api/students/${currentStudentId}/prediction/refresh`, {
              method: 'POST',
              headers: { 'Authorization': `Bearer ${token}` }
          });
@@ -595,7 +595,7 @@ async function handleSubmit(e) {
         const pfpFormData = new FormData();
         pfpFormData.append('file', pfpFile);
         try {
-            const pfpResp = await fetch(`http://localhost:8080/api/students/${data.studentId}/profile-picture`, {
+            const pfpResp = await fetch(window.PLACE_IQ_API_URL + `/api/students/${data.studentId}/profile-picture`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${data.token}` },
                 body: pfpFormData
@@ -618,7 +618,7 @@ async function handleSubmit(e) {
         formData.append('file', resumeFile);
         
         try {
-            await fetch(`http://localhost:8080/api/students/${data.studentId}/resume`, {
+            await fetch(window.PLACE_IQ_API_URL + `/api/students/${data.studentId}/resume`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${data.token}` },
                 body: formData

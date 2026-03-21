@@ -486,7 +486,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
       document.getElementById('greeting-title').textContent = `Good morning, ${s.name.split(' ')[0]} 👋`;
       
       // Fetch latest prediction
-      const predResp = await fetch(`http://localhost:8080/api/students/${s.id}/prediction`, {
+      const predResp = await fetch(window.PLACE_IQ_API_URL + `/api/students/${s.id}/prediction`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const p = await predResp.json();
@@ -509,7 +509,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 
       // Fetch Skill Gap Data to populate Gap Alerts and AI Recos
       try {
-        const gapResp = await fetch(`http://localhost:8080/api/students/${s.id}/skill-gap`, {
+        const gapResp = await fetch(window.PLACE_IQ_API_URL + `/api/students/${s.id}/skill-gap`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if(gapResp.ok) {

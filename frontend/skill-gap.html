@@ -330,11 +330,11 @@ async function loadUser() {
 async function loadSkillGap(studentId, token, role = null) {
   try {
     console.log(`Fetching skill gap... studentId=${studentId}, role=${role}`);
-    const url = role ? `http://localhost:8080/api/students/${studentId}/skill-gap?role=${role}` : `http://localhost:8080/api/students/${studentId}/skill-gap`;
+    const url = role ? window.PLACE_IQ_API_URL + `/api/students/${studentId}/skill-gap?role=${role}` : window.PLACE_IQ_API_URL + `/api/students/${studentId}/skill-gap`;
     
     const [gapResp, predResp] = await Promise.all([
       fetch(url, { headers: { 'Authorization': `Bearer ${token}` } }),
-      fetch(`http://localhost:8080/api/students/${studentId}/prediction`, { headers: { 'Authorization': `Bearer ${token}` } })
+      fetch(window.PLACE_IQ_API_URL + `/api/students/${studentId}/prediction`, { headers: { 'Authorization': `Bearer ${token}` } })
     ]);
 
     const gap = await gapResp.json();

@@ -330,7 +330,7 @@ async function fetchRoadmap(targetRole) {
   const user = await loadUser();
   
   try {
-    const resp = await fetch('http://localhost:8001/generate/roadmap/generate', {
+    const resp = await fetch(window.PLACE_IQ_AI_API_URL + '/generate/roadmap/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -451,7 +451,7 @@ async function toggleTask(taskKey, cb, stepIndex) {
     initChart();
     renderRoadmap({ roadmap: currentRoadmapData });
 
-    await fetch('http://localhost:8080/api/roadmap/progress', {
+    await fetch(window.PLACE_IQ_API_URL + '/api/roadmap/progress', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -465,7 +465,7 @@ async function toggleMonth(month, isDone) {
   const token = localStorage.getItem('token');
   currentProgress[month] = isDone;
   
-  await fetch('http://localhost:8080/api/roadmap/progress', {
+  await fetch(window.PLACE_IQ_API_URL + '/api/roadmap/progress', {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',

@@ -418,7 +418,7 @@ async function togglePlaced(id, newStatus, btn) {
 function downloadStudentResume(id) {
   const token = localStorage.getItem('token');
   const link = document.createElement('a');
-  link.href = `http://localhost:8080/api/students/${id}/resume/download`;
+  link.href = window.PLACE_IQ_API_URL + `/api/students/${id}/resume/download`;
   link.setAttribute('download', '');
   // Use fetch so we can pass auth token
   fetch(link.href, { headers: { 'Authorization': `Bearer ${token}` } })
@@ -449,7 +449,7 @@ async function viewStudentDetail(id) {
   const initials = s.name ? s.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2) : '??';
   const avatarEl = document.getElementById('modal-avatar');
   if (s.profilePictureUrl) {
-    const fullUrl = s.profilePictureUrl.startsWith('http') ? s.profilePictureUrl : `http://localhost:8080${s.profilePictureUrl}`;
+    const fullUrl = s.profilePictureUrl.startsWith('http') ? s.profilePictureUrl : window.PLACE_IQ_API_URL + s.profilePictureUrl;
     avatarEl.innerHTML = `<img src="${fullUrl}" style="width:100%;height:100%;object-fit:cover">`;
   } else {
     avatarEl.textContent = initials;
@@ -500,8 +500,8 @@ async function viewStudentDetail(id) {
   document.getElementById('modal-ai-metrics').innerHTML = '<span style="color:var(--muted)">Fetching AI data...</span>';
   try {
      const [predResp, gapResp] = await Promise.all([
-        fetch(`http://localhost:8080/api/students/${id}/prediction`, { headers: { 'Authorization': `Bearer ${token}` }}),
-        fetch(`http://localhost:8080/api/students/${id}/skill-gap`, { headers: { 'Authorization': `Bearer ${token}` }})
+        fetch(window.PLACE_IQ_API_URL + `/api/students/${id}/prediction`, { headers: { 'Authorization': `Bearer ${token}` }}),
+        fetch(window.PLACE_IQ_API_URL + `/api/students/${id}/skill-gap`, { headers: { 'Authorization': `Bearer ${token}` }})
      ]);
      
      if (predResp.ok) {
