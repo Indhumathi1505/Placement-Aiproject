@@ -1,6 +1,9 @@
 package com.placeiq.config;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -8,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
@@ -26,15 +30,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleException(Exception e) {
+        log.error("Unhandled exception: ", e);
         Map<String, Object> body = new HashMap<>();
         body.put("status", 500);
         body.put("error", "Internal Server Error");
         body.put("message", e.getMessage());
         body.put("type", e.getClass().getName());
-        
-        // Log the exception for the developer
-        e.printStackTrace();
-        
         return ResponseEntity.status(500).body(body);
     }
     
@@ -45,5 +46,14 @@ public class GlobalExceptionHandler {
         body.put("error", "Bad Request");
         body.put("message", e.getMessage());
         return ResponseEntity.status(400).body(body);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException e) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", 401);
+        body.put("error", "Unauthorized");
+        body.put("message", e.getMessage());
+        return ResponseEntity.status(401).body(body);
     }
 }

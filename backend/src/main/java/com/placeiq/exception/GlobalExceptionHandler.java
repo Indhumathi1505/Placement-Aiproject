@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
-@RestControllerAdvice
+// @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
