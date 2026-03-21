@@ -98,44 +98,4 @@ public class StudentController {
         return ResponseEntity.ok(studentService.getLatestSkillGap(id));
     }
 
-    // ─── ADMIN ────────────────────────────────────────────────────────────────
-
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Student>> getAllStudents() {
-        return ResponseEntity.ok(studentService.getAllStudents());
-    }
-
-    @GetMapping("/stats")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, Object>> getStats() {
-        return ResponseEntity.ok(Map.of(
-                "total", studentService.getTotalStudents(),
-                "placed", studentService.getPlacedCount()
-        ));
-    }
-
-    /** Toggle a student's placement status (Admin only) */
-    @PutMapping("/{id}/placed")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Student> togglePlaced(@PathVariable String id, @RequestBody Map<String, Boolean> body) {
-        return ResponseEntity.ok(studentService.setPlacedStatus(id, body.getOrDefault("placed", false)));
-    }
-
-    /** Download a student's uploaded resume PDF (Admin only) */
-    @GetMapping("/{id}/resume/download")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<org.springframework.core.io.Resource> downloadResume(@PathVariable String id) throws MalformedURLException {
-        Student s = studentService.getStudentById(id);
-        if (s.getResumeFilePath() == null) {
-            return ResponseEntity.notFound().build();
-        }
-        Path filePath = Paths.get(s.getResumeFilePath());
-        org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(filePath.toUri());
-        String filename = filePath.getFileName().toString();
-        return ResponseEntity.ok()
-                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
-                .body(resource);
-    }
 }
