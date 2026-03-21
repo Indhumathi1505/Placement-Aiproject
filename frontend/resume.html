@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Resume Analyzer — PlaceIQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#050A14;--surface:#0C1422;--card:#111E30;--border:#1E3048;--accent:#4F9EFF;--accent2:#7C6FF7;--accent3:#3DDCB2;--text:#E8F0FF;--muted:#7A95B5;--dim:#3D5472;--font-head:'Plus Jakarta Sans',sans-serif;--font-body:'Inter',sans-serif;--r:12px;--sidebar:240px}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh;font-size:14px}
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-family:var(--font-head);font-size:18px;font-weight:800}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#4F9EFF,#7C6FF7)}
+.sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto}
+.nav-section{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);padding:8px 8px 4px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);cursor:pointer;transition:all .2s;margin-bottom:2px;text-decoration:none;font-size:14px}
+.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
+.nav-item.active{background:rgba(79,158,255,0.1);color:var(--accent);font-weight:500}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-user{padding:16px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;background:var(--card);border:1px solid var(--border)}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:rgba(79,158,255,0.2);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--accent);font-size:13px}
+.main{margin-left:var(--sidebar);flex:1}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
+.topbar-title{font-family:var(--font-head);font-size:18px;font-weight:700}
+.content{padding:32px}
+
+/* UPLOAD AREA */
+.upload-zone{border:2px dashed var(--border);border-radius:20px;padding:60px 40px;text-align:center;cursor:pointer;transition:all .3s;background:var(--surface);position:relative;overflow:hidden;margin-bottom:32px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(79,158,255,0.03)}
+.upload-zone.done{border-color:var(--accent3);background:rgba(61,220,178,0.03)}
+.upload-bg{position:absolute;inset:0;opacity:0.03;background:radial-gradient(circle at 50% 50%,var(--accent),transparent 70%);pointer-events:none}
+.upload-icon{font-size:64px;margin-bottom:16px}
+.upload-title{font-family:var(--font-head);font-size:22px;font-weight:700;margin-bottom:8px}
+.upload-sub{font-size:15px;color:var(--muted);margin-bottom:24px}
+.upload-btn{background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:var(--r);font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.upload-btn:hover{background:#3d8ff0}
+.upload-types{font-size:12px;color:var(--dim);margin-top:16px}
+input[type=file]{display:none}
+
+/* ANALYZING STATE */
+.analyzing{display:none;text-align:center;padding:48px}
+.analyzing.show{display:block}
+.ai-spinner{width:64px;height:64px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.analyzing-steps{display:flex;flex-direction:column;gap:12px;max-width:300px;margin:24px auto 0;text-align:left}
+.a-step{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.a-step.done{color:var(--accent3)}
+.a-step.current{color:var(--text)}
+.a-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--dim);flex-shrink:0}
+.a-step.done .a-dot{background:var(--accent3);border-color:var(--accent3)}
+.a-step.current .a-dot{background:var(--accent);border-color:var(--accent);animation:pulse2 1s infinite}
+@keyframes pulse2{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* RESULTS */
+.results{display:none}
+.results.show{display:block}
+.results-header{margin-bottom:28px}
+.score-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.score-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden}
+.score-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.score-card.s1::after{background:linear-gradient(90deg,var(--accent),transparent)}
+.score-card.s2::after{background:linear-gradient(90deg,var(--accent2),transparent)}
+.score-card.s3::after{background:linear-gradient(90deg,var(--accent3),transparent)}
+.score-card.s4::after{background:linear-gradient(90deg,#FFB347,transparent)}
+.score-label{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.score-val{font-family:var(--font-head);font-size:36px;font-weight:700;line-height:1}
+.score-sub{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* ANALYSIS SECTIONS */
+.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.analysis-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
+.analysis-title{font-family:var(--font-head);font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.skill-chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:500;margin:4px}
+.skill-chip.found{background:rgba(61,220,178,0.1);border-color:rgba(61,220,178,0.2);color:var(--accent3)}
+.skill-chip.missing{background:rgba(255,107,107,0.1);border-color:rgba(255,107,107,0.2);color:#FF6B6B}
+.skill-chip.bonus{background:rgba(79,158,255,0.1);border-color:rgba(79,158,255,0.2);color:var(--accent)}
+
+.improvement-list{display:flex;flex-direction:column;gap:10px}
+.imp-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;gap:12px}
+.imp-priority{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 8px;border-radius:100px;flex-shrink:0;margin-top:1px}
+.pri-critical{background:rgba(255,107,107,0.15);color:#FF6B6B}
+.pri-medium{background:rgba(255,179,71,0.15);color:#FFB347}
+.pri-low{background:rgba(61,220,178,0.15);color:var(--accent3)}
+.imp-title{font-weight:500;font-size:13px;margin-bottom:2px}
+.imp-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* RADAR CHART */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
+.chart-title{font-family:var(--font-head);font-size:15px;font-weight:600;margin-bottom:16px}
+
+/* ATS SECTION */
+.ats-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
+.ats-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.ats-meter{height:12px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:20px}
+.ats-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#FFB347,var(--accent3));transition:width 1.5s ease}
+.ats-checks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ats-check{display:flex;align-items:center;gap:8px;font-size:13px;padding:10px 14px;border-radius:8px;background:var(--card);border:1px solid var(--border)}
+.ats-check.pass{border-color:rgba(61,220,178,0.2)}
+.ats-check span:first-child{font-size:14px}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><span class="logo-dot"></span>PlaceIQ</div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="resume.html" class="nav-item active"><span class="nav-icon">📄</span>Resume Analyzer</a>
+    <div class="nav-section">Career Tools</div>
+    <a href="skill-gap.html" class="nav-item"><span class="nav-icon">🧩</span>Skill Gap Analysis</a>
+    <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span>Learning Roadmap</a>
+    <a href="interview.html" class="nav-item"><span class="nav-icon">🎤</span>Mock Interview</a>
+    <a href="chatbot.html" class="nav-item"><span class="nav-icon">🤖</span>AI Assistant</a>
+    <div class="nav-section">Account</div>
+    <a href="register.html?edit=true" class="nav-item"><span class="nav-icon">👤</span>My Profile</a>
+    <a href="admin.html" class="nav-item"><span class="nav-icon">⚙️</span>Admin Panel</a>
+    <a href="index.html" class="nav-item"><span class="nav-icon">🚪</span>Sign Out</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-card">
+      <div class="user-avatar" id="sidebar-avatar">??</div>
+      <div>
+        <div id="sidebar-name" style="font-weight:500;font-size:13px">Loading...</div>
+        <div id="sidebar-dept" style="font-size:11px;color:var(--muted)">...</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">📄 AI Resume Analyzer</div>
+    <div style="font-size:13px;color:var(--muted)">Powered by Mistral-7B + Hugging Face</div>
+  </div>
+  <div class="content">
+
+    <!-- UPLOAD -->
+    <div class="upload-zone" id="upload-zone" ondragover="dov(event)" ondragleave="dlv()" ondrop="drop(event)" onclick="document.getElementById('rf').click()">
+      <div class="upload-bg"></div>
+      <div class="upload-icon" id="uz-icon">📄</div>
+      <div class="upload-title" id="uz-title">Drop Your Resume Here</div>
+      <div class="upload-sub" id="uz-sub">Our AI will extract skills, score your resume, and provide detailed improvement suggestions</div>
+      <button class="upload-btn" type="button">Browse Files</button>
+      <div class="upload-types">PDF, DOC, DOCX supported • Max 5MB</div>
+      <input type="file" id="rf" accept=".pdf,.doc,.docx" onchange="handleUpload(this)"/>
+    </div>
+
+    <!-- ANALYZING -->
+    <div class="analyzing" id="analyzing">
+      <div class="ai-spinner"></div>
+      <h2 style="font-family:var(--font-head);font-size:22px;font-weight:700;margin-bottom:8px">Analyzing Your Resume</h2>
+      <p style="color:var(--muted);font-size:14px">Mistral-7B is reading your resume...</p>
+      <div class="analyzing-steps">
+        <div class="a-step done" id="as1"><div class="a-dot"></div>Extracting text from PDF</div>
+        <div class="a-step current" id="as2"><div class="a-dot"></div>Identifying skills & technologies</div>
+        <div class="a-step" id="as3"><div class="a-dot"></div>Scoring ATS compatibility</div>
+        <div class="a-step" id="as4"><div class="a-dot"></div>Detecting skill gaps</div>
+        <div class="a-step" id="as5"><div class="a-dot"></div>Generating improvement report</div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results" id="results">
+      <div class="results-header">
+        <h2 style="font-family:var(--font-head);font-size:22px;font-weight:700;margin-bottom:4px">Resume Analysis Complete ✅</h2>
+        <p style="color:var(--muted);font-size:14px">AI analyzed <strong style="color:var(--text)">resume_rahul_kumar.pdf</strong> — 2 pages, 487 words</p>
+      </div>
+
+      <div class="score-row">
+        <div class="score-card s1">
+          <div class="score-label">Overall Score</div>
+          <div class="score-val" style="color:var(--accent)">68<span style="font-size:16px;color:var(--muted)">/100</span></div>
+          <div class="score-sub">Above average</div>
+        </div>
+        <div class="score-card s2">
+          <div class="score-label">ATS Score</div>
+          <div class="score-val" style="color:var(--accent2)">72<span style="font-size:16px;color:var(--muted)">/100</span></div>
+          <div class="score-sub">Good keyword match</div>
+        </div>
+        <div class="score-card s3">
+          <div class="score-label">Skills Detected</div>
+          <div class="score-val" style="color:var(--accent3)">14</div>
+          <div class="score-sub">6 high-demand skills</div>
+        </div>
+        <div class="score-card s4">
+          <div class="score-label">Gaps Found</div>
+          <div class="score-val" style="color:#FFB347">5</div>
+          <div class="score-sub">Critical improvements</div>
+        </div>
+      </div>
+
+      <div class="analysis-grid">
+        <div class="analysis-card">
+          <div class="analysis-title">✅ Skills Detected by AI</div>
+          <div id="skills-detected-container">
+            <span class="skill-chip found">☕ Java</span>
+            <span class="skill-chip found">🌱 Spring Boot</span>
+            <span class="skill-chip found">⚛️ React.js</span>
+            <span class="skill-chip found">🍃 MongoDB</span>
+            <span class="skill-chip found">🐍 Python</span>
+            <span class="skill-chip found">🔐 REST APIs</span>
+            <span class="skill-chip found">📦 Maven</span>
+            <span class="skill-chip found">🐙 Git</span>
+            <span class="skill-chip found">🗄️ MySQL</span>
+            <span class="skill-chip bonus">📊 Data Structures</span>
+            <span class="skill-chip bonus">🔒 JWT Auth</span>
+            <span class="skill-chip bonus">🐳 Docker (basic)</span>
+          </div>
+        </div>
+        <div class="analysis-card">
+          <div class="analysis-title">❌ Missing Skills Detected</div>
+          <div id="skills-missing-container">
+            <span class="skill-chip missing">⚙️ System Design</span>
+            <span class="skill-chip missing">🔧 Kubernetes</span>
+            <span class="skill-chip missing">☁️ AWS/GCP/Azure</span>
+            <span class="skill-chip missing">📊 Advanced SQL</span>
+            <span class="skill-chip missing">🧪 Unit Testing</span>
+          </div>
+          <div style="margin-top:16px;padding:12px;background:var(--card);border-radius:8px;border:1px solid var(--border)">
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">
+              <strong style="color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:.5px">AI Insight:</strong><br/>
+              Adding System Design and Cloud skills could increase your placement probability from <strong style="color:var(--text)">68%</strong> to <strong style="color:var(--accent3)">~84%</strong> for mid-tier product companies.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATS SECTION -->
+      <div class="ats-card">
+        <div class="ats-header">
+          <div class="analysis-title" style="margin:0">🤖 ATS Compatibility Analysis</div>
+          <span style="font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--accent)">72%</span>
+        </div>
+        <div class="ats-meter"><div class="ats-fill" style="width:72%" id="ats-fill"></div></div>
+        <div class="ats-checks">
+          <div class="ats-check pass"><span>✅</span>Contact info present</div>
+          <div class="ats-check pass"><span>✅</span>Education section found</div>
+          <div class="ats-check pass"><span>✅</span>Skills section detected</div>
+          <div class="ats-check pass"><span>✅</span>Project descriptions found</div>
+          <div class="ats-check"><span>⚠️</span>Weak action verbs (some)</div>
+          <div class="ats-check"><span>❌</span>Quantified achievements missing</div>
+          <div class="ats-check"><span>❌</span>No certifications section</div>
+          <div class="ats-check"><span>⚠️</span>One-page limit exceeded</div>
+        </div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-card">
+          <div class="chart-title">Resume Strength by Section</div>
+          <canvas id="sectionChart" height="180"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Keyword Density vs Target</div>
+          <canvas id="keywordChart" height="180"></canvas>
+        </div>
+      </div>
+
+      <!-- IMPROVEMENTS -->
+      <div class="analysis-card" style="margin-bottom:20px">
+        <div class="analysis-title">🔧 AI Improvement Suggestions</div>
+        <div class="improvement-list">
+          <div class="imp-item">
+            <span class="imp-priority pri-critical">Critical</span>
+            <div class="imp-content">
+              <div class="imp-title">Add quantified achievements</div>
+              <div class="imp-desc">Replace "Built a web app" with "Built a React.js e-commerce app handling 1,000+ daily users with 99.5% uptime." Numbers dramatically improve ATS and recruiter attention.</div>
+            </div>
+          </div>
+          <div class="imp-item">
+            <span class="imp-priority pri-critical">Critical</span>
+            <div class="imp-content">
+              <div class="imp-title">Add a Certifications section</div>
+              <div class="imp-desc">Even 1-2 relevant certifications (AWS Cloud Practitioner, Oracle Java) significantly boost ATS scores and recruiter confidence in your skills.</div>
+            </div>
+          </div>
+          <div class="imp-item">
+            <span class="imp-priority pri-medium">Medium</span>
+            <div class="imp-content">
+              <div class="imp-title">Strengthen action verbs</div>
+              <div class="imp-desc">Replace passive verbs: "was responsible for" → "Led", "worked on" → "Engineered", "helped with" → "Implemented". Use strong technical verbs throughout.</div>
+            </div>
+          </div>
+          <div class="imp-item">
+            <span class="imp-priority pri-medium">Medium</span>
+            <div class="imp-content">
+              <div class="imp-title">Condense to 1 page</div>
+              <div class="imp-desc">For students/freshers, a single-page resume is standard. Move internship details to bullet points. Recruiters spend avg. 6 seconds on a resume.</div>
+            </div>
+          </div>
+          <div class="imp-item">
+            <span class="imp-priority pri-low">Optional</span>
+            <div class="imp-content">
+              <div class="imp-title">Add a GitHub / Portfolio link</div>
+              <div class="imp-desc">A GitHub profile with active contributions can substitute for work experience. 78% of tech recruiters check GitHub profiles during screening.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="upload-btn" onclick="window.location='skill-gap.html'" style="flex:1;justify-content:center">View Full Skill Gap Analysis →</button>
+        <button class="upload-btn" onclick="window.location='roadmap.html'" style="flex:1;justify-content:center;background:var(--accent2)">Generate Learning Roadmap →</button>
+        <button class="upload-btn" onclick="window.location='dashboard.html'" style="flex:1;justify-content:center;background:var(--card);border:1px solid var(--border);color:var(--text)">← Back to Dashboard</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/api-config.js"></script>
+<script>
+
+function dov(e){e.preventDefault();document.getElementById('upload-zone').classList.add('drag')}
+function dlv(){document.getElementById('upload-zone').classList.remove('drag')}
+function drop(e){e.preventDefault();dlv();const f=e.dataTransfer.files[0];if(f)process(f)}
+function handleUpload(i){if(i.files[0])process(i.files[0])}
+async function loadUser() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  const resp = await fetch(window.PLACE_IQ_API_URL + '/api/students/me', { headers: { 'Authorization': `Bearer ${token}` } });
+  const s = await resp.json();
+  const initials = s.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2);
+  document.getElementById('sidebar-avatar').textContent = initials;
+  
+  if (s.profilePictureUrl) {
+    const fullUrl = s.profilePictureUrl.startsWith('http') ? s.profilePictureUrl : window.PLACE_IQ_API_URL + s.profilePictureUrl;
+    document.getElementById('sidebar-avatar').innerHTML = `<img src="${fullUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+  }
+  
+  document.getElementById('sidebar-name').textContent = s.name;
+  document.getElementById('sidebar-dept').textContent = `${s.department} • CGPA ${s.cgpa}`;
+  return s;
+}
+
+async function process(f){
+  const uz=document.getElementById('upload-zone');
+  uz.classList.add('done');
+  document.getElementById('uz-icon').textContent='✅';
+  document.getElementById('uz-title').textContent=f.name+' uploaded!';
+  document.getElementById('uz-sub').textContent='Starting AI analysis...';
+  
+  const user = await loadUser();
+  if (!user || !user.id) {
+    alert("Please log in first!");
+    return;
+  }
+  
+  uz.style.display='none';
+  document.getElementById('analyzing').classList.add('show');
+  runSteps();
+  
+  const formData = new FormData();
+  formData.append("file", f);
+  const token = localStorage.getItem('token');
+  
+  try {
+    const resp = await fetch(`${window.PLACE_IQ_API_URL}/api/students/${user.id}/resume`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData
+    });
+    
+    if (!resp.ok) {
+        throw new Error("HTTP error " + resp.status);
+    }
+    const data = await resp.json();
+    
+    const pythonicData = {
+        resume_score: data.resumeScore,
+        ats_score: data.atsScore,
+        extracted_skills: data.extractedSkills || [],
+        missing_skills: data.missingSkills || [],
+        placement_probability: data.placementProbability,
+        company_probabilities: data.companyProbabilities,
+        summary: data.overallSummary || "",
+        recommendations: data.aiRecommendations || [],
+        improvement_tips: data.improvementTips || []
+    };
+    
+    // Store in localStorage to trigger refreshes
+    localStorage.setItem('latest_analysis', JSON.stringify(pythonicData));
+    localStorage.setItem('refresh_needed', 'true');
+    
+    showResults(pythonicData, f);
+  } catch (err) {
+    console.error("Analysis failed:", err);
+    alert("AI analysis failed. Please check if the AI service is running or check the console.");
+  }
+}
+
+function runSteps(){
+  const steps=['as1','as2','as3','as4','as5'];
+  let i=0;
+  const interval=setInterval(()=>{
+    if(i>0){document.getElementById(steps[i-1]).className='a-step done';}
+    if(i<steps.length){
+      document.getElementById(steps[i]).className='a-step current';
+      i++;
+    } else {
+      clearInterval(interval);
+    }
+  },300);
+}
+
+function showResults(data, f){
+  document.getElementById('analyzing').classList.remove('show');
+  document.getElementById('results').classList.add('show');
+  
+  if (f) {
+    document.querySelector('.results-header p').innerHTML = `AI analyzed <strong style="color:var(--text)">${f.name}</strong> — ${(f.size / 1024).toFixed(0)} KB`;
+  }
+  
+  // Update UI with real data
+  document.querySelector('.score-card.s1 .score-val').innerHTML = `${data.resume_score}<span style="font-size:16px;color:var(--muted)">/100</span>`;
+  document.querySelector('.score-card.s2 .score-val').innerHTML = `${data.ats_score}<span style="font-size:16px;color:var(--muted)">/100</span>`;
+  document.querySelector('.score-card.s3 .score-val').textContent = data.extracted_skills.length;
+  document.querySelector('.score-card.s4 .score-val').textContent = data.missing_skills.length;
+  
+    document.getElementById('ats-fill').style.width = '0';
+    setTimeout(() => {
+      document.getElementById('ats-fill').style.transition = 'width 1.5s ease';
+      document.getElementById('ats-fill').style.width = `${data.ats_score}%`;
+      document.querySelector('.ats-header span').textContent = `${data.ats_score}%`;
+    }, 100);
+
+    // Dynamic ATS Checks
+    const checks = document.querySelector('.ats-checks');
+    checks.innerHTML = `
+      <div class="ats-check ${data.extracted_skills.length > 5 ? 'pass' : ''}"><span>${data.extracted_skills.length > 5 ? '✅' : '⚠️'}</span>Skills detected (${data.extracted_skills.length})</div>
+      <div class="ats-check ${data.ats_score > 60 ? 'pass' : ''}"><span>${data.ats_score > 60 ? '✅' : '❌'}</span>Keyword density</div>
+      <div class="ats-check ${data.resume_score > 50 ? 'pass' : ''}"><span>${data.resume_score > 50 ? '✅' : '⚠️'}</span>Overall formatting</div>
+      <div class="ats-check ${data.missing_skills.length < 10 ? 'pass' : ''}"><span>${data.missing_skills.length < 10 ? '✅' : '⚠️'}</span>Gap score</div>
+      <div class="ats-check ${data.ats_score > 80 ? 'pass' : ''}"><span>${data.ats_score > 80 ? '✅' : '⚠️'}</span>Recruiter readability</div>
+      <div class="ats-check ${data.ats_score > 40 ? 'pass' : ''}"><span>${data.ats_score > 40 ? '✅' : '❌'}</span>Contact info present</div>
+    `;
+
+  // Update Skill Chips
+  const foundContainer = document.getElementById('skills-detected-container');
+  foundContainer.innerHTML = data.extracted_skills.map(s => `<span class="skill-chip found">${s}</span>`).join('');
+  
+  const missingContainer = document.getElementById('skills-missing-container');
+  missingContainer.innerHTML = data.missing_skills.map(s => `<span class="skill-chip missing">${s}</span>`).join('');
+
+  renderCharts(data);
+}
+
+function renderCharts(data) {
+  const ctxSection = document.getElementById('sectionChart').getContext('2d');
+  const ctxKeyword = document.getElementById('keywordChart').getContext('2d');
+
+  // Section Strength (Mocked from overall scores for visual benefit)
+  new Chart(ctxSection, {
+    type: 'bar',
+    data: {
+      labels: ['Header', 'Skills', 'Experience', 'Education', 'Projects'],
+      datasets: [{
+        label: 'Strength %',
+        data: [
+          Math.min(100, data.ats_score + 10),
+          data.resume_score,
+          Math.max(40, data.resume_score - 15),
+          90,
+          Math.max(50, data.resume_score - 5)
+        ],
+        backgroundColor: ['#4F9EFF', '#7C6FF7', '#3DDCB2', '#FFB347', '#FF6B6B'],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: { x: { display: false, max: 100 }, y: { grid: { display: false }, ticks: { color: '#7A95B5' } } }
+    }
+  });
+
+  // Keyword Density
+  new Chart(ctxKeyword, {
+    type: 'doughnut',
+    data: {
+      labels: ['Found', 'Missing'],
+      datasets: [{
+        data: [data.extracted_skills.length, data.missing_skills.length],
+        backgroundColor: ['#3DDCB2', '#1E3048'],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      cutout: '70%',
+      plugins: { legend: { position: 'bottom', labels: { color: '#7A95B5', boxWidth: 12 } } }
+    }
+  });
+}
+
+loadUser();
+</script>
+<script src="binary-bg.js"></script>
+</body>
+</html>

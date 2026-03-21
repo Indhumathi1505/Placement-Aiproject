@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mock Interview AI — PlaceIQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#050A14;--surface:#0C1422;--card:#111E30;--border:#1E3048;--accent:#4F9EFF;--accent2:#7C6FF7;--accent3:#3DDCB2;--text:#E8F0FF;--muted:#7A95B5;--dim:#3D5472;--font-head:'Plus Jakarta Sans',sans-serif;--font-body:'Inter',sans-serif;--r:12px;--sidebar:240px}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh;font-size:14px}
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-family:var(--font-head);font-size:18px;font-weight:800}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#4F9EFF,#7C6FF7)}
+.sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto}
+.nav-section{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);padding:8px 8px 4px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);cursor:pointer;transition:all .2s;margin-bottom:2px;text-decoration:none;font-size:14px}
+.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
+.nav-item.active{background:rgba(79,158,255,0.1);color:var(--accent);font-weight:500}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-user{padding:16px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;background:var(--card);border:1px solid var(--border)}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:rgba(79,158,255,0.2);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--accent);font-size:13px}
+.main{margin-left:var(--sidebar);flex:1}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
+.topbar-title{font-family:var(--font-head);font-size:18px;font-weight:700}
+.content{padding:32px}
+.btn-sm{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:all .2s}
+.btn-sm:hover{background:#3d8ff0}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:28px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px;width:fit-content}
+.tab{padding:8px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:var(--muted);transition:all .2s;white-space:nowrap}
+.tab.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+
+/* CONFIG */
+.config-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+select,input{background:var(--card);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--font-body);font-size:14px;padding:12px 14px;width:100%;outline:none;transition:all .2s}
+select:focus,input:focus{border-color:var(--accent)}
+select option{background:var(--card)}
+label{font-size:12px;font-weight:500;color:var(--muted);display:block;margin-bottom:6px}
+
+/* QUESTION CARDS */
+.question-deck{display:flex;flex-direction:column;gap:16px}
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all .2s}
+.q-header{padding:18px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;cursor:pointer}
+.q-header:hover{background:rgba(255,255,255,0.02)}
+.q-left{display:flex;align-items:flex-start;gap:14px;flex:1}
+.q-num{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:13px;font-weight:700;flex-shrink:0}
+.q-num.tech, .q-num.technical{background:rgba(79,158,255,0.12);color:var(--accent)}
+.q-num.hr, .q-num.hr-&-communication{background:rgba(61,220,178,0.12);color:var(--accent3)}
+.q-num.code, .q-num.coding-&-design{background:rgba(124,111,247,0.12);color:var(--accent2)}
+.q-num.aptitude{background:rgba(255,179,71,0.12);color:#FFB347}
+.q-text{font-size:14px;font-weight:500;line-height:1.5;flex:1}
+.q-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.q-badge{font-size:10px;padding:2px 8px;border-radius:100px;font-weight:600}
+.badge-tech, .badge-technical{background:rgba(79,158,255,0.12);color:var(--accent)}
+.badge-hr, .badge-hr-&-communication{background:rgba(61,220,178,0.12);color:var(--accent3)}
+.badge-code, .badge-coding-&-design{background:rgba(124,111,247,0.12);color:var(--accent2)}
+.badge-aptitude{background:rgba(255,179,71,0.12);color:#FFB347}
+.badge-easy{background:rgba(61,220,178,0.08);color:var(--accent3)}
+.badge-medium{background:rgba(255,179,71,0.08);color:#FFB347}
+.badge-hard{background:rgba(255,107,107,0.08);color:#FF6B6B}
+.q-toggle{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);flex-shrink:0;transition:all .2s}
+.q-card.expanded .q-toggle{background:var(--accent);border-color:var(--accent);color:#fff}
+.q-body{display:none;padding:0 20px 20px}
+.q-card.expanded .q-body{display:block}
+.q-hint{background:rgba(79,158,255,0.05);border:1px solid rgba(79,158,255,0.12);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;font-size:13px;color:var(--muted);line-height:1.6}
+.q-hint strong{color:var(--accent);display:block;margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.q-answer{background:var(--card);border-radius:var(--r);border:1px solid var(--border)}
+.q-answer-label{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.q-answer textarea{width:100%;background:transparent;border:none;padding:14px 16px;font-family:var(--font-body);font-size:14px;color:var(--text);resize:vertical;min-height:80px;outline:none;line-height:1.6}
+.q-actions{display:flex;gap:8px;margin-top:12px}
+.q-btn{border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:all .2s}
+.q-btn:hover{border-color:var(--dim);color:var(--text)}
+.q-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.q-btn.primary:hover{background:#3d8ff0}
+
+/* SKILL GAP SECTION */
+.gap-overview{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+.gap-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center}
+.gap-stat-val{font-family:var(--font-head);font-size:28px;font-weight:700;margin-bottom:4px}
+.gap-stat-label{font-size:12px;color:var(--muted)}
+.gap-table{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px}
+.gap-table-head{display:grid;grid-template-columns:1fr 120px 120px 100px;gap:16px;padding:14px 20px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.gap-row{display:grid;grid-template-columns:1fr 120px 120px 100px;gap:16px;padding:14px 20px;border-bottom:1px solid var(--border);align-items:center;transition:background .2s}
+.gap-row:last-child{border:none}
+.gap-row:hover{background:rgba(255,255,255,0.02)}
+.gap-skill{font-weight:500;font-size:13px}
+.gap-current{font-size:13px}
+.gap-needed{font-size:13px;color:var(--muted)}
+.gap-severity-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;text-align:center}
+.sev-critical{background:rgba(255,107,107,0.12);color:#FF6B6B}
+.sev-medium{background:rgba(255,179,71,0.12);color:#FFB347}
+.sev-low{background:rgba(61,220,178,0.12);color:var(--accent3)}
+.gap-actions-row{display:flex;gap:12px}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><span class="logo-dot"></span>PlaceIQ</div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="resume.html" class="nav-item"><span class="nav-icon">📄</span>Resume Analyzer</a>
+    <div class="nav-section">Career Tools</div>
+    <a href="skill-gap.html" class="nav-item"><span class="nav-icon">🧩</span>Skill Gap Analysis</a>
+    <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span>Learning Roadmap</a>
+    <a href="interview.html" class="nav-item active"><span class="nav-icon">🎤</span>Mock Interview</a>
+    <a href="chatbot.html" class="nav-item"><span class="nav-icon">🤖</span>AI Assistant</a>
+    <div class="nav-section">Account</div>
+    <a href="register.html?edit=true" class="nav-item"><span class="nav-icon">👤</span>My Profile</a>
+    <a href="admin.html" class="nav-item"><span class="nav-icon">⚙️</span>Admin Panel</a>
+    <a href="index.html" class="nav-item"><span class="nav-icon">🚪</span>Sign Out</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-card">
+      <div class="user-avatar" id="sidebar-avatar">??</div>
+      <div>
+        <div id="sidebar-name" style="font-weight:500;font-size:13px">Loading...</div>
+        <div id="sidebar-dept" style="font-size:11px;color:var(--muted)">...</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">🎤 Mock Interview AI</div>
+    <button class="btn-sm" onclick="genMore()">🤖 Generate More Questions</button>
+  </div>
+  <div class="content">
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this,'interview')">🎤 Mock Interview</div>
+      <div class="tab" onclick="switchTab(this,'skillgap')">🧩 Skill Gap Analysis</div>
+    </div>
+
+    <!-- INTERVIEW TAB -->
+    <div id="tab-interview">
+      <div class="config-row">
+        <div style="display:none">
+          <label>Target Company</label>
+          <select id="company">
+            <option selected>All Top Companies</option>
+          </select>
+        </div>
+        <div>
+          <label>Question Type</label>
+          <select id="qtype" onchange="filterQuestions()">
+            <option value="all">All Types</option>
+            <option value="Aptitude">Aptitude</option>
+            <option value="Technical">Technical</option>
+            <option value="Coding & Design">Coding & Design</option>
+            <option value="HR & Communication">HR & Communication</option>
+          </select>
+        </div>
+        <div>
+          <label>Difficulty</label>
+          <select id="diff">
+            <option>All Levels</option>
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Hard</option>
+          </select>
+        </div>
+      </div>
+      <div id="interview-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,11,14,0.98);z-index:10000;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px">
+        <div style="font-size:48px;margin-bottom:20px">🔐</div>
+        <h2 style="font-size:32px;margin-bottom:15px">Interview in Progress</h2>
+        <p style="color:var(--muted);max-width:500px;margin-bottom:30px">Tab switching is strictly prohibited during the mock interview. Your session has been paused because you navigated away.</p>
+        <button class="q-btn primary" onclick="resumeInterview()">Resume Interview</button>
+      </div>
+
+      <div id="start-screen" style="text-align:center;padding:60px 20px;background:var(--card);border:1px solid var(--border);border-radius:24px;margin-bottom:30px">
+        <div style="font-size:64px;margin-bottom:24px">🧠</div>
+        <h2 style="font-size:28px;margin-bottom:16px">Ready for your Mega Mock Interview?</h2>
+        <p style="color:var(--muted);max-width:600px;margin:0 auto 24px">
+          This session includes **40+ questions** covering Aptitude, Technical, Coding, and HR 
+          from top companies like TCS, Amazon, and Deloitte. 
+        </p>
+
+        <div style="max-width:400px;margin:0 auto 32px;text-align:left">
+          <label style="color:var(--accent)">1. Select Your Target Domain</label>
+          <select id="target-domain" style="margin-bottom:15px">
+            <option value="Software Developer">Software Developer (SDE)</option>
+            <option value="Fullstack Developer">Fullstack Developer</option>
+            <option value="Frontend Developer">Frontend Developer</option>
+            <option value="Backend Developer">Backend Developer</option>
+            <option value="UI/UX Designer">UI/UX Designer</option>
+            <option value="Cloud Engineer">Cloud Engineer</option>
+            <option value="Data Analyst">Data Analyst</option>
+            <option value="AI Engineer">AI Engineer</option>
+          </select>
+          <label style="color:var(--accent)">2. Select Difficulty</label>
+          <select id="start-diff">
+            <option>All Levels</option>
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Hard</option>
+          </select>
+        </div>
+
+        <button class="q-btn primary" style="padding:15px 40px;font-size:18px" onclick="startMegaInterview()">Start Full Mock Interview</button>
+        <p style="margin-top:16px;font-size:12px;color:var(--dim)">⚠️ Tab switching is monitored and restricted.</p>
+      </div>
+
+      <div id="questions-area" style="display:none">
+        <div class="question-deck" id="question-deck">
+          <!-- Questions will be injected here, grouped by rounds -->
+        </div>
+
+        <div style="margin-top:28px;display:flex;gap:12px">
+          <button class="btn-sm" style="padding:12px 24px" onclick="startMegaInterview()">🤖 Generate New Set</button>
+          <button class="btn-sm" style="padding:12px 24px;background:var(--accent2)" onclick="window.location='skill-gap.html'">🧩 See Skill Gap Report</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKILL GAP TAB -->
+    <div id="tab-skillgap" style="display:none">
+      <div class="gap-overview">
+        <div class="gap-stat">
+          <div class="gap-stat-val" style="color:#FF6B6B">5</div>
+          <div class="gap-stat-label">Critical Skill Gaps</div>
+        </div>
+        <div class="gap-stat">
+          <div class="gap-stat-val" style="color:#FFB347">3</div>
+          <div class="gap-stat-label">Medium Priority Gaps</div>
+        </div>
+        <div class="gap-stat">
+          <div class="gap-stat-val" style="color:var(--accent3)">+28%</div>
+          <div class="gap-stat-label">Potential Score Increase</div>
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px">
+        <div style="font-family:var(--font-head);font-size:15px;font-weight:600;margin-bottom:8px">📋 AI Skill Gap Summary</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7">Based on analysis of your profile against 150+ company job descriptions, your strongest gaps are in <strong style="color:var(--text)">System Design, Cloud Technologies, and Advanced SQL</strong>. Filling these 3 gaps alone would increase your average placement probability from <strong style="color:var(--accent)">68%</strong> to an estimated <strong style="color:var(--accent3)">84%</strong>.</p>
+      </div>
+
+      <div class="gap-table">
+        <div class="gap-table-head">
+          <div>Skill</div><div>Your Level</div><div>Required Level</div><div>Priority</div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-skill">System Design (HLD/LLD)</div>
+          <div class="gap-current" style="color:#FF6B6B">Beginner</div>
+          <div class="gap-needed">Intermediate+</div>
+          <div><span class="gap-severity-badge sev-critical">Critical</span></div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-skill">AWS / Cloud Fundamentals</div>
+          <div class="gap-current" style="color:#FF6B6B">None</div>
+          <div class="gap-needed">AWS Cloud Practitioner</div>
+          <div><span class="gap-severity-badge sev-critical">Critical</span></div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-skill">Advanced SQL & Query Opt.</div>
+          <div class="gap-current" style="color:#FFB347">Basic</div>
+          <div class="gap-needed">Intermediate</div>
+          <div><span class="gap-severity-badge sev-critical">Critical</span></div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-skill">Kubernetes / Container Orch.</div>
+          <div class="gap-current" style="color:#FF6B6B">None</div>
+          <div class="gap-needed">Basic awareness</div>
+          <div><span class="gap-severity-badge sev-medium">Medium</span></div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-skill">Unit Testing (JUnit/Mockito)</div>
+          <div class="gap-current" style="color:#FFB347">Basic</div>
+          <div class="gap-needed">Intermediate</div>
+          <div><span class="gap-severity-badge sev-medium">Medium</span></div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-skill">Machine Learning Basics</div>
+          <div class="gap-current" style="color:#FFB347">Awareness</div>
+          <div class="gap-needed">Optional (bonus)</div>
+          <div><span class="gap-severity-badge sev-low">Optional</span></div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-skill">Python (Data Analysis)</div>
+          <div class="gap-current" style="color:#FFB347">Basic</div>
+          <div class="gap-needed">Intermediate</div>
+          <div><span class="gap-severity-badge sev-low">Optional</span></div>
+        </div>
+      </div>
+
+      <div class="gap-actions-row">
+        <button class="btn-sm" style="flex:1;padding:12px;text-align:center" onclick="window.location='roadmap.html'">🗺️ Generate Roadmap to Fix Gaps →</button>
+        <button class="btn-sm" style="flex:1;padding:12px;text-align:center;background:var(--card);border:1px solid var(--border);color:var(--text)" onclick="switchTab(document.querySelector('.tab'),'interview')">← Back to Interview Prep</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/api-config.js"></script>
+<script>
+
+async function loadUser() {
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = 'login.html'; return; }
+  const resp = await fetch(window.PLACE_IQ_API_URL + '/api/students/me', { headers: { 'Authorization': `Bearer ${token}` } });
+  const s = await resp.json();
+  const initials = s.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2);
+  document.getElementById('sidebar-avatar').textContent = initials;
+  
+  if (s.profilePictureUrl) {
+    const fullUrl = s.profilePictureUrl.startsWith('http') ? s.profilePictureUrl : window.PLACE_IQ_API_URL + s.profilePictureUrl;
+    document.getElementById('sidebar-avatar').innerHTML = `<img src="${fullUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+  }
+  
+  document.getElementById('sidebar-name').textContent = s.name;
+  document.getElementById('sidebar-dept').textContent = `${s.department} • CGPA ${s.cgpa}`;
+  return s;
+}
+
+let isInterviewActive = false;
+let tabSwitchCount = 0;
+
+function startMegaInterview() {
+  const btn = document.querySelector('#start-screen .q-btn') || document.querySelector('#questions-area .btn-sm');
+  const domain = document.getElementById('target-domain').value;
+  const diff = document.getElementById('start-diff').value;
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Generating 40+ Questions...';
+  }
+  
+  loadQuestions(40, domain, diff).then(() => {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('questions-area').style.display = 'block';
+    isInterviewActive = true;
+    tabSwitchCount = 0;
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '🤖 Generate New Set';
+    }
+  });
+}
+
+function resumeInterview() {
+  document.getElementById('interview-overlay').style.display = 'none';
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (isInterviewActive && document.visibilityState === 'hidden') {
+    tabSwitchCount++;
+    document.getElementById('interview-overlay').style.display = 'flex';
+    console.warn(`Tab switch detected! Count: ${tabSwitchCount}`);
+  }
+});
+
+window.addEventListener('blur', () => {
+  if (isInterviewActive) {
+    document.getElementById('interview-overlay').style.display = 'flex';
+  }
+});
+
+async function loadQuestions(count = 30, overrideRole = null, overrideDiff = null) {
+  const deck = document.getElementById('question-deck');
+  deck.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">🤖 Generating fresh questions...</div>';
+  
+  const company = document.getElementById('company').value;
+  const diff = overrideDiff || document.getElementById('diff').value;
+  const user = await loadUser();
+
+  try {
+    const resp = await fetch(window.PLACE_IQ_AI_API_URL + '/api/ai/generate-interview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        target_role: overrideRole || user.targetRole || "SDE",
+        company: company,
+        difficulty: diff === 'All Levels' ? 'Medium' : diff,
+        count: count,
+        student_id: user.id,
+        skills: user.skills,
+        cgpa: user.cgpa
+      })
+    });
+    const data = await resp.json();
+    renderQuestions(data.rounds);
+  } catch (err) {
+    deck.innerHTML = `
+      <div style="padding:40px;text-align:center;background:rgba(255,107,107,0.05);border:1px solid rgba(255,107,107,0.2);border-radius:12px">
+        <div style="font-size:40px;margin-bottom:15px">🔌</div>
+        <div style="color:#FF6B6B;font-weight:700;font-size:16px;margin-bottom:8px">AI Service Offline</div>
+        <div style="color:var(--muted);font-size:13px;line-height:1.6;max-width:400px;margin:0 auto">
+          The Mock Interview engine is unreachable. Please ensure the Python AI service is running on <strong>port 8001</strong>.
+          <br><br>
+          <code style="background:var(--card);padding:8px 12px;border-radius:6px;display:block;color:var(--text)">python ai-service/main.py</code>
+          <br>
+          <button class="btn-sm" style="margin-top:10px" onclick="loadQuestions()">🔄 Try Reconnecting</button>
+        </div>
+      </div>`;
+  }
+}
+
+async function genMore() {
+  // Clear any cached questions from the frontend to enforce a fresh fetch
+  loadQuestions();
+}
+
+function renderQuestions(rounds) {
+  const deck = document.getElementById('question-deck');
+  let html = '';
+
+  rounds.forEach(round => {
+    const roundName = round.round_name;
+    const roundQuestions = round.questions;
+
+    html += `
+      <div class="round-section" style="margin-top:20px;margin-bottom:30px">
+        <div style="font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+          <span style="width:12px;height:12px;border-radius:3px;background:var(--accent)"></span>
+          ${roundName}
+        </div>
+        <div class="round-questions" style="display:flex;flex-direction:column;gap:16px">
+          ${roundQuestions.map((q, i) => {
+            const type = roundName.split(' ')[0].toLowerCase();
+            const typeClass = type === 'problem' ? 'code' : type;
+            
+            return `
+            <div class="q-card" data-type="${roundName}">
+              <div class="q-header" onclick="toggleQ(this)">
+                <div class="q-left">
+                  <div class="q-num ${typeClass}">${roundName[0]}${i+1}</div>
+                  <div>
+                    <div class="q-text">${q.question}</div>
+                    <div class="q-badges">
+                      <span class="q-badge badge-${typeClass}">${roundName}</span>
+                      <span class="q-badge badge-${q.difficulty.toLowerCase()}">${q.difficulty}</span>
+                      ${q.topic ? `<span class="q-badge" style="background:rgba(255,255,255,0.05)">${q.topic}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+                <div class="q-toggle">+</div>
+              </div>
+              <div class="q-body">
+                <div class="q-hint"><strong>💡 AI Hint</strong>${q.hint || 'No hint available.'}</div>
+                
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+                  <div class="q-hint" style="margin-bottom:0"><strong>📂 Domain</strong>${q.domain || 'General'}</div>
+                  <div class="q-hint" style="margin-bottom:0"><strong>⏱️ Expected Time</strong>${q.expected_time || 5} mins</div>
+                </div>
+
+                <div class="q-hint" style="background:rgba(61,220,178,0.03);border-color:rgba(61,220,178,0.1)">
+                  <strong>🎯 Evaluation Criteria</strong>${q.evaluation_criteria || 'Correctness and clarity of explanation.'}
+                </div>
+
+                <div class="q-answer">
+                  <div class="q-answer-label">Your Answer</div>
+                  <textarea placeholder="Type your answer here..."></textarea>
+                </div>
+                
+                <div class="q-actions">
+                  <button class="q-btn primary" onclick="submitAnswer(this, '${q.question_id}')">Submit & Get Feedback</button>
+                  <button class="q-btn" onclick="toggleAnswer(this)">Show Sample Answer</button>
+                </div>
+                
+                <div class="sample-answer-area" style="margin-top:15px;display:none;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:15px">
+                  <div style="color:var(--accent);font-weight:700;font-size:11px;text-transform:uppercase;margin-bottom:8px">✨ Model Answer</div>
+                  <div style="font-size:13px;line-height:1.6;color:var(--muted)">${q.sample_answer || 'Sample answer not available for this question.'}</div>
+                </div>
+                
+                <div class="feedback-area" style="margin-top:15px;display:none"></div>
+              </div>
+            </div>
+          `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  deck.innerHTML = html || '<div style="padding:40px;text-align:center;color:var(--muted)">No questions found.</div>';
+  
+  const firstHeader = document.querySelector('.q-header');
+  if (firstHeader) firstHeader.click();
+}
+
+async function submitAnswer(btn, qId) {
+  const card = btn.closest('.q-card');
+  const textarea = card.querySelector('textarea');
+  const feedbackArea = card.querySelector('.feedback-area');
+  const answer = textarea.value.trim();
+  
+  if (!answer) { alert("Please type an answer first."); return; }
+  
+  btn.disabled = true;
+  btn.textContent = "Analyzing...";
+  
+  // Minimal feedback simulation to make it feel interactive
+  setTimeout(() => {
+    feedbackArea.style.display = 'block';
+    feedbackArea.innerHTML = `
+      <div style="background:rgba(61,220,178,0.1);border:1px solid var(--accent3);border-radius:12px;padding:15px">
+        <div style="color:var(--accent3);font-weight:700;font-size:12px;margin-bottom:5px">✓ AI FEEDBACK</div>
+        <div style="font-size:13px;line-height:1.5">Good attempt! You covered the core logic. To improve, try to mention the time complexity (O(N)) and space complexity (O(1)) explicitly.</div>
+      </div>
+    `;
+    btn.textContent = "Submitted";
+    btn.style.background = "var(--dim)";
+  }, 1000);
+}
+
+function toggleQ(header) {
+  const card = header.closest('.q-card');
+  const toggle = header.querySelector('.q-toggle');
+  if(card.classList.contains('expanded')) {
+    card.classList.remove('expanded');
+    toggle.textContent = '+';
+  } else {
+    card.classList.add('expanded');
+    toggle.textContent = '−';
+  }
+}
+
+function switchTab(el, tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-interview').style.display = tabId === 'interview' ? 'block' : 'none';
+  document.getElementById('tab-skillgap').style.display = tabId === 'skillgap' ? 'block' : 'none';
+}
+
+function toggleAnswer(btn) {
+  const area = btn.closest('.q-body').querySelector('.sample-answer-area');
+  if (area.style.display === 'none') {
+    area.style.display = 'block';
+    btn.textContent = 'Hide Sample Answer';
+  } else {
+    area.style.display = 'none';
+    btn.textContent = 'Show Sample Answer';
+  }
+}
+
+function filterQuestions() {
+  const type = document.getElementById('qtype').value;
+  document.querySelectorAll('.q-card').forEach(c => {
+    c.style.display = (type === 'all' || c.dataset.type === type) ? 'block' : 'none';
+  });
+}
+
+// Initial load removed to support "Start Interview" screen
+// loadQuestions();
+
+// Check for refresh triggers
+window.addEventListener('focus', () => {
+  if (localStorage.getItem('refresh_needed') === 'true') {
+    localStorage.removeItem('refresh_needed');
+    loadQuestions();
+  }
+});
+</script>
+<script src="binary-bg.js"></script>
+</body>
+</html>

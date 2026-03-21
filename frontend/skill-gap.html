@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Skill Gap Analysis — PlaceIQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050A14;--surface:#0C1422;--card:#111E30;--border:#1E3048;
+  --accent:#4F9EFF;--accent2:#7C6FF7;--accent3:#3DDCB2;
+  --text:#E8F0FF;--muted:#7A95B5;--dim:#3D5472;
+  --font-head:'Plus Jakarta Sans',sans-serif;--font-body:'Inter',sans-serif;
+  --r:12px;--r2:16px;--sidebar:240px;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh;font-size:14px}
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-family:var(--font-head);font-size:18px;font-weight:800}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#4F9EFF,#7C6FF7)}
+.sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto}
+.nav-section{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);padding:8px 8px 4px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);cursor:pointer;transition:all .2s;margin-bottom:2px;text-decoration:none;font-size:14px}
+.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
+.nav-item.active{background:rgba(79,158,255,0.1);color:var(--accent);font-weight:500}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-user{padding:16px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;background:var(--card);border:1px solid var(--border)}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:rgba(79,158,255,0.2);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--accent);font-size:13px;flex-shrink:0}
+.user-name{font-weight:500;font-size:13px}
+.user-dept{font-size:11px;color:var(--muted)}
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
+.topbar-title{font-family:var(--font-head);font-size:18px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.btn-sm{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:all .2s}
+.btn-sm:hover{background:#3d8ff0}
+.btn-ghost-sm{background:transparent;color:var(--muted);border:1px solid var(--border);padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--font-body);transition:all .2s}
+.btn-ghost-sm:hover{border-color:var(--dim);color:var(--text)}
+.content{padding:32px;flex:1}
+.section-head{font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:4px;letter-spacing:-0.3px}
+.section-sub{color:var(--muted);font-size:13px;margin-bottom:24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:24px}
+.card-title{font-family:var(--font-head);font-size:15px;font-weight:600;margin-bottom:4px}
+.card-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+
+/* METRICS */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:20px;position:relative;overflow:hidden}
+.metric-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.m1::after{background:linear-gradient(90deg,#FF7B7B,transparent)}
+.m2::after{background:linear-gradient(90deg,#FFB347,transparent)}
+.m3::after{background:linear-gradient(90deg,var(--accent3),transparent)}
+.m4::after{background:linear-gradient(90deg,var(--accent2),transparent)}
+.metric-label{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.metric-val{font-family:var(--font-head);font-size:32px;font-weight:700;line-height:1}
+.metric-val.red{color:#FF7B7B}
+.metric-val.orange{color:#FFB347}
+.metric-val.green{color:var(--accent3)}
+.metric-val.purple{color:var(--accent2)}
+.metric-icon{position:absolute;top:16px;right:16px;font-size:24px;opacity:.5}
+.metric-badge{display:inline-block;margin-top:8px;font-size:11px;padding:3px 8px;border-radius:100px}
+.badge-red{background:rgba(255,123,123,.1);color:#FF7B7B}
+.badge-orange{background:rgba(255,179,71,.1);color:#FFB347}
+.badge-green{background:rgba(61,220,178,.1);color:var(--accent3)}
+
+/* TARGET SELECTOR */
+.target-row{display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap}
+.target-btn{padding:9px 18px;border-radius:100px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .2s}
+.target-btn:hover{border-color:var(--dim);color:var(--text)}
+.target-btn.active{background:rgba(79,158,255,0.12);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* CHARTS GRID */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+
+/* GAP TABLE */
+.gap-table{width:100%;border-collapse:collapse;margin-top:4px}
+.gap-table th{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:10px 16px;text-align:left;border-bottom:1px solid var(--border)}
+.gap-table td{padding:14px 16px;border-bottom:1px solid rgba(30,48,72,.5);vertical-align:middle;font-size:13px}
+.gap-table tr:last-child td{border:none}
+.gap-table tr:hover td{background:rgba(255,255,255,0.02)}
+.skill-name{font-weight:500;font-size:13px}
+.level-bar-wrap{display:flex;align-items:center;gap:10px}
+.level-bar{flex:1;height:6px;background:var(--card);border-radius:3px;overflow:hidden;max-width:120px}
+.level-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.level-label{font-size:11px;color:var(--muted);min-width:30px}
+.priority-badge{font-size:10px;padding:3px 10px;border-radius:100px;font-weight:600}
+.p-critical{background:rgba(255,100,100,.12);color:#FF7B7B}
+.p-high{background:rgba(255,179,71,.12);color:#FFB347}
+.p-medium{background:rgba(61,220,178,.12);color:var(--accent3)}
+.p-low{background:rgba(124,111,247,.12);color:var(--accent2)}
+.course-link{color:var(--accent);text-decoration:none;font-size:12px;display:flex;align-items:center;gap:4px}
+.course-link:hover{text-decoration:underline}
+
+/* SKILL CHIPS */
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{padding:6px 14px;border-radius:100px;font-size:12px;font-weight:500}
+.chip-missing{background:rgba(255,100,100,.1);border:1px solid rgba(255,100,100,.2);color:#FF9090}
+.chip-strong{background:rgba(61,220,178,.1);border:1px solid rgba(61,220,178,.2);color:var(--accent3)}
+
+/* ROADMAP MINI */
+.roadmap-mini{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.road-item{display:flex;align-items:flex-start;gap:14px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;transition:all .2s}
+.road-item:hover{border-color:var(--dim)}
+.road-num{width:28px;height:28px;border-radius:50%;background:rgba(79,158,255,0.15);border:1px solid rgba(79,158,255,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0}
+.road-content{flex:1}
+.road-skill{font-size:13px;font-weight:600;margin-bottom:3px}
+.road-resources{font-size:11px;color:var(--muted)}
+.road-pri{font-size:10px;padding:2px 8px;border-radius:100px;margin-left:8px}
+
+/* PROGRESS OVERVIEW */
+.progress-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px}
+.progress-item{padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px}
+.progress-label{font-size:12px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between}
+.progress-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width 1s ease}
+
+/* AI INSIGHT BOX */
+.insight-box{background:linear-gradient(135deg,rgba(79,158,255,0.05),rgba(124,111,247,0.05));border:1px solid rgba(79,158,255,0.15);border-radius:var(--r2);padding:20px;margin-bottom:28px}
+.insight-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ai-badge{padding:4px 10px;border-radius:100px;background:linear-gradient(135deg,rgba(79,158,255,0.2),rgba(124,111,247,0.2));font-size:11px;font-weight:600;color:var(--accent)}
+.insight-text{font-size:13px;color:var(--muted);line-height:1.7}
+.insight-text strong{color:var(--text)}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-dot"></div>
+    PlaceIQ
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="resume.html" class="nav-item"><span class="nav-icon">📄</span>Resume Analyzer</a>
+    <div class="nav-section">Learning</div>
+    <a href="skill-gap.html" class="nav-item active"><span class="nav-icon">🧩</span>Skill Gap Analysis</a>
+    <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span>Learning Roadmap</a>
+    <a href="interview.html" class="nav-item"><span class="nav-icon">🎤</span>Mock Interview</a>
+    <a href="chatbot.html" class="nav-item"><span class="nav-icon">🤖</span>AI Assistant</a>
+    <div class="nav-section">Account</div>
+    <a href="register.html?edit=true" class="nav-item"><span class="nav-icon">👤</span>My Profile</a>
+    <a href="admin.html" class="nav-item"><span class="nav-icon">⚙️</span>Admin Panel</a>
+    <a href="login.html" class="nav-item"><span class="nav-icon">🚪</span>Sign Out</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-card">
+      <div class="user-avatar" id="sidebar-avatar">RK</div>
+      <div>
+        <div class="user-name" id="sidebar-name">Rahul Kumar</div>
+        <div class="user-dept" id="sidebar-dept">CSE • CGPA 8.4</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">🧩 Skill Gap Analysis</div>
+    <div class="topbar-right">
+      <button class="btn-ghost-sm" onclick="window.location.href='roadmap.html'">📚 View Roadmap</button>
+      <button class="btn-sm" onclick="runAnalysis()">🔍 Re-Analyze</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="section-head">Skill Gap Report</div>
+    <p class="section-sub">Target Role: Software Development Engineer — Last analyzed: Today, 9:30 AM</p>
+
+    <!-- AI INSIGHT -->
+    <div class="insight-box">
+      <div class="insight-header">
+        <span class="ai-badge">🧠 AI Insight</span>
+      </div>
+      <div class="insight-text" id="ai-insight">
+        Loading AI analysis...
+      </div>
+    </div>
+
+    <!-- METRICS -->
+    <div class="metric-grid">
+      <div class="metric-card m1">
+        <div class="metric-label">Critical Gaps</div>
+        <div class="metric-val red" id="metric-critical">0</div>
+        <span class="metric-badge badge-red">Must Fix</span>
+        <div class="metric-icon">⛔</div>
+      </div>
+      <div class="metric-card m2">
+        <div class="metric-label">Medium Gaps</div>
+        <div class="metric-val orange" id="metric-medium">0</div>
+        <span class="metric-badge badge-orange">Should Fix</span>
+        <div class="metric-icon">⚠️</div>
+      </div>
+      <div class="metric-card m3">
+        <div class="metric-label">Skills Matched</div>
+        <div class="metric-val green" id="metric-matched">0</div>
+        <span class="metric-badge badge-green">Above Average</span>
+        <div class="metric-icon">✅</div>
+      </div>
+      <div class="metric-card m4">
+        <div class="metric-label">Readiness Score</div>
+        <div class="metric-val purple" id="metric-readiness">0%</div>
+        <span class="metric-badge" style="background:rgba(124,111,247,.1);color:var(--accent2)">Based on skills</span>
+        <div class="metric-icon">📈</div>
+      </div>
+    </div>
+
+    <!-- TARGET ROLE SELECTOR -->
+    <div class="target-row">
+      <button class="target-btn active" onclick="setTarget(this,'SDE')">💻 SDE</button>
+      <button class="target-btn" onclick="setTarget(this,'Data Scientist')">📊 Data Scientist</button>
+      <button class="target-btn" onclick="setTarget(this,'DevOps')">☁️ DevOps Engineer</button>
+      <button class="target-btn" onclick="setTarget(this,'Full Stack')">🌐 Full Stack Dev</button>
+      <button class="target-btn" onclick="setTarget(this,'ML Engineer')">🤖 ML Engineer</button>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts-grid">
+      <div class="card">
+        <div class="card-title">Your Skills vs Required Skills</div>
+        <div class="card-sub">Radar comparison for SDE role at top-3 companies</div>
+        <canvas id="radarChart" height="280"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Gap Severity Distribution</div>
+        <div class="card-sub">Breakdown of your skill gaps by priority level</div>
+        <canvas id="doughnutChart" height="280"></canvas>
+      </div>
+    </div>
+
+    <!-- CHIPS SECTION -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px">
+      <div class="card">
+        <div class="card-title">✅ Your Strong Skills</div>
+        <div class="card-sub">Skills matching target role requirements</div>
+        <div class="chip-grid" id="strong-skills-grid">
+           <!-- Dynamically populated -->
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">❌ Missing Skills</div>
+        <div class="card-sub">Skills you need to acquire for your target role</div>
+        <div class="chip-grid" id="missing-skills-grid">
+           <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- GAP TABLE -->
+    <div class="card" style="margin-bottom:28px">
+      <div class="card-title">Detailed Skill Gap Breakdown</div>
+      <div class="card-sub">Current level vs required level for each skill gap</div>
+      <table class="gap-table">
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>Your Level</th>
+            <th>Required</th>
+            <th>Gap</th>
+            <th>Priority</th>
+            <th>Top Resource</th>
+          </tr>
+        </thead>
+        <tbody id="gap-table-body">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RECOMMENDED LEARNING PATH -->
+    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;margin-bottom:28px">
+      <div class="card">
+        <div class="card-title">🚀 Recommended Learning Path</div>
+        <div class="card-sub">Priority-ordered skills to acquire based on your target role</div>
+        <div class="roadmap-mini" id="reco-list">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📈 Current Skill Strength</div>
+        <div class="card-sub">Your proficiency in matched skills</div>
+        <div class="progress-grid" id="progress-list">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/api-config.js"></script>
+<script>
+
+let currentUser = null;
+let radarChartInstance = null;
+let doughnutChartInstance = null;
+
+async function loadUser() {
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = 'login.html'; return; }
+  
+  const resp = await fetch(window.PLACE_IQ_API_URL + '/api/students/me', { headers: { 'Authorization': `Bearer ${token}` } });
+  const s = await resp.json();
+  currentUser = s;
+
+  const initials = s.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2);
+  document.getElementById('sidebar-avatar').textContent = initials;
+  
+  if (s.profilePictureUrl) {
+    const fullPfpUrl = s.profilePictureUrl.startsWith('http') ? s.profilePictureUrl : window.PLACE_IQ_API_URL + s.profilePictureUrl;
+    document.getElementById('sidebar-avatar').innerHTML = `<img src="${fullPfpUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+  }
+  
+  document.getElementById('sidebar-name').textContent = s.name;
+  document.getElementById('sidebar-dept').textContent = `${s.department} • CGPA ${s.cgpa}`;
+  
+  // Set default target active UI state
+  document.querySelectorAll('.target-btn').forEach(b => {
+      b.classList.remove('active');
+      if(b.textContent.includes(s.targetRole)) {
+          b.classList.add('active');
+      }
+  });
+
+  loadSkillGap(s.id, token);
+}
+
+async function loadSkillGap(studentId, token, role = null) {
+  try {
+    console.log(`Fetching skill gap... studentId=${studentId}, role=${role}`);
+    const url = role ? `http://localhost:8080/api/students/${studentId}/skill-gap?role=${role}` : `http://localhost:8080/api/students/${studentId}/skill-gap`;
+    
+    const [gapResp, predResp] = await Promise.all([
+      fetch(url, { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch(`http://localhost:8080/api/students/${studentId}/prediction`, { headers: { 'Authorization': `Bearer ${token}` } })
+    ]);
+
+    const gap = await gapResp.json();
+    console.log("Skill Gap Response:", gap);
+    
+    let pred = null;
+    if (predResp.ok) { pred = await predResp.json(); }
+    console.log("Prediction Response:", pred);
+
+    renderDashboard(gap, pred);
+  } catch(e) {
+    console.error("Failed to load skill gap", e);
+  }
+}
+
+function renderDashboard(gap, pred) {
+    const targetRoleText = currentUser.targetRole || "SDE";
+    document.querySelector('.section-sub').innerHTML = `Target Role: ${targetRoleText} — Last analyzed: Just now`;
+
+    const metricCritical = document.getElementById('metric-critical');
+    const metricMedium = document.getElementById('metric-medium');
+    const metricMatched = document.getElementById('metric-matched');
+    const metricReadiness = document.getElementById('metric-readiness');
+
+    const criticalCount = gap.criticalSkills ? gap.criticalSkills.length : 0;
+    const missingCount = gap.missingSkills ? gap.missingSkills.length : 0;
+    const mediumCount = Math.max(0, missingCount - criticalCount);
+    
+    // Skills matched
+    const userSkills = currentUser.skills || [];
+    metricMatched.textContent = userSkills.length;
+    metricCritical.textContent = criticalCount;
+    metricMedium.textContent = mediumCount;
+
+    if (pred && pred.readinessScore) {
+        metricReadiness.textContent = (pred.readinessScore * 10).toFixed(0) + '%';
+    } else {
+        metricReadiness.textContent = Math.max(0, 100 - (gap.gapScore * 100)).toFixed(0) + '%';
+    }
+
+    // AI Insight
+    let strongHTML = userSkills.slice(0,3).join(", ");
+    let missingHTML = gap.criticalSkills ? gap.criticalSkills.slice(0,2).join(" and ") : "Specific frameworks";
+    const gapScorePct = Math.round(gap.gapScore * 100) || 15;
+
+    const insightEl = document.getElementById('ai-insight');
+    if (gap.summary && gap.summary.includes("AI service unavailable")) {
+        insightEl.innerHTML = `
+            <div style="color:#FF7B7B;font-weight:600;display:flex;align-items:center;gap:8px">
+                <span>⚠️ AI Service is currently offline.</span>
+            </div>
+            <p style="margin-top:8px">The skill gap analysis and automated recommendations are unavailable. 
+            Please ensure the Python AI service is running on port 8001.</p>
+        `;
+    } else {
+        document.getElementById('ai-insight').innerHTML = `
+            Your profile shows <strong>strong foundation skills</strong> in ${strongHTML || 'your domain'}. However, critical gaps exist in <strong>${missingHTML || 'advanced patterns'}</strong> which are required for top roles at your target companies. Closing these gaps could push your placement probability significantly higher. Estimated time to bridge all gaps: <strong>${gap.estimatedWeeksToClose || '4-6'} weeks</strong>.
+        `;
+    }
+
+    // Chips
+    const strongGrid = document.getElementById('strong-skills-grid');
+    strongGrid.innerHTML = userSkills.map(s => `<span class="chip chip-strong">${s}</span>`).join('');
+    
+    const missingGrid = document.getElementById('missing-skills-grid');
+    if (gap.missingSkills) {
+        missingGrid.innerHTML = gap.missingSkills.map(s => `<span class="chip chip-missing">${s}</span>`).join('');
+    }
+
+    // Table
+    const tableBody = document.getElementById('gap-table-body');
+    tableBody.innerHTML = '';
+    const entries = gap.currentSkills || [];
+    let sevDist = { "Critical": 0, "High": 0, "Medium": 0, "Low": 0 };
+    
+    const radarLabels = [];
+    const radarReq = [];
+    const radarUsr = [];
+
+    entries.forEach(entry => {
+        let pColor = 'var(--accent2)';
+        let pClass = 'p-low';
+        let priority = entry.priority || 'Medium';
+
+        sevDist[priority] = (sevDist[priority] || 0) + 1;
+
+        if (priority === 'CRITICAL') { pColor = '#FF7B7B'; pClass = 'p-critical'; }
+        else if (priority === 'HIGH') { pColor = '#FFB347'; pClass = 'p-high'; }
+        else if (priority === 'MEDIUM') { pColor = 'var(--accent3)'; pClass = 'p-medium'; }
+
+        let gapVal = entry.requiredLevel - entry.currentLevel;
+        if (gapVal < 0) gapVal = 0;
+
+        // Use top 7 properties for Radar Chart
+        if (radarLabels.length < 7) {
+            radarLabels.push(entry.skillName);
+            radarReq.push(entry.requiredLevel);
+            radarUsr.push(entry.currentLevel);
+        }
+
+        // Auto Match fake link for table
+        let linkHtml = `<a href="roadmap.html" class="course-link">▶ View Roadmap</a>`;
+        if (gap.recommendedCourses) {
+           const reco = gap.recommendedCourses.find(r => r.skillName.toLowerCase() === entry.skillName.toLowerCase());
+           if (reco) {
+               linkHtml = `<a href="${reco.url}" target="_blank" class="course-link">▶ ${reco.courseName}</a>`;
+           }
+        }
+
+        tableBody.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td><span class="skill-name">${entry.skillName}</span></td>
+            <td><div class="level-bar-wrap"><div class="level-bar"><div class="level-fill" style="width:${entry.currentLevel}%;background:${pColor}"></div></div><span class="level-label">${entry.currentLevel}%</span></div></td>
+            <td><div class="level-bar-wrap"><div class="level-bar"><div class="level-fill" style="width:${entry.requiredLevel}%;background:var(--accent3)"></div></div><span class="level-label">${entry.requiredLevel}%</span></div></td>
+            <td style="color:${pColor};font-weight:600">-${gapVal}%</td>
+            <td><span class="priority-badge ${pClass}">${priority}</span></td>
+            <td>${linkHtml}</td>
+          </tr>
+        `);
+    });
+
+    // Recommended Path
+    const recoList = document.getElementById('reco-list');
+    recoList.innerHTML = '';
+    const recos = gap.recommendedCourses || [];
+    recos.forEach((r, i) => {
+        let pClass = r.priority === 'CRITICAL' ? 'p-critical' : (r.priority === 'HIGH' ? 'p-high' : 'p-medium');
+        recoList.insertAdjacentHTML('beforeend', `
+          <div class="road-item" onclick="window.open('${r.url}', '_blank')">
+            <div class="road-num">${i + 1}</div>
+            <div class="road-content">
+              <div class="road-skill">${r.courseName} <span class="priority-badge ${pClass} road-pri">${r.priority}</span></div>
+              <div class="road-resources">📺 ${r.platform} • ⏱ ${r.duration} • 🎯 ${r.skillName}</div>
+            </div>
+          </div>
+        `);
+    });
+
+    // Progress List (Strong Skills)
+    const progList = document.getElementById('progress-list');
+    progList.innerHTML = '';
+    entries.filter(e => e.currentLevel >= e.requiredLevel || e.currentLevel > 40).slice(0, 6).forEach(e => {
+        progList.insertAdjacentHTML('beforeend', `
+          <div class="progress-item">
+            <div class="progress-label"><span>${e.skillName}</span><span style="color:var(--accent3)">${e.currentLevel}%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${e.currentLevel}%;background:var(--accent3)"></div></div>
+          </div>
+        `);
+    });
+
+    // Update Charts
+    updateCharts(radarLabels, radarUsr, radarReq, Object.values(sevDist));
+}
+
+function updateCharts(labels, usrData, reqData, sevData) {
+    if (radarChartInstance) radarChartInstance.destroy();
+    if (doughnutChartInstance) doughnutChartInstance.destroy();
+
+    const radarCtx = document.getElementById('radarChart').getContext('2d');
+    radarChartInstance = new Chart(radarCtx, {
+      type: 'radar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Your Skills',
+            data: usrData,
+            backgroundColor: 'rgba(79,158,255,0.15)',
+            borderColor: '#4F9EFF',
+            borderWidth: 2,
+            pointBackgroundColor: '#4F9EFF',
+            pointRadius: 4
+          },
+          {
+            label: 'Required (' + (currentUser.targetRole || 'SDE') + ')',
+            data: reqData,
+            backgroundColor: 'rgba(61,220,178,0.08)',
+            borderColor: '#3DDCB2',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointBackgroundColor: '#3DDCB2',
+            pointRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          r: {
+            min: 0, max: 100,
+            ticks: { color: '#7A95B5', font: { size: 10 }, stepSize: 25 },
+            grid: { color: 'rgba(30,48,72,0.8)' },
+            pointLabels: { color: '#E8F0FF', font: { size: 11 } }
+          }
+        },
+        plugins: {
+          legend: { labels: { color: '#E8F0FF', font: { size: 12 }, padding: 16 } }
+        }
+      }
+    });
+
+    const dCtx = document.getElementById('doughnutChart').getContext('2d');
+    doughnutChartInstance = new Chart(dCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Critical', 'High', 'Medium', 'Low'],
+        datasets: [{
+          data: sevData.length ? sevData : [0,0,0,0],
+          backgroundColor: ['rgba(255,123,123,0.8)', 'rgba(255,179,71,0.8)', 'rgba(61,220,178,0.8)', 'rgba(124,111,247,0.8)'],
+          borderColor: '#050A14',
+          borderWidth: 3,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#E8F0FF', font: { size: 12 }, padding: 16, boxWidth: 12 }
+          }
+        }
+      }
+    });
+}
+
+function setTarget(el, role) {
+  document.querySelectorAll('.target-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  
+  if (currentUser) {
+      currentUser.targetRole = role; // update locally
+      const token = localStorage.getItem('token');
+      loadSkillGap(currentUser.id, token, role);
+  }
+}
+
+async function runAnalysis() {
+  const btn = document.querySelector('.btn-sm');
+  btn.textContent = '⏳ Analyzing...';
+  btn.disabled = true;
+  
+  if (currentUser) {
+     const token = localStorage.getItem('token');
+     const role = currentUser.targetRole || "SDE";
+     await loadSkillGap(currentUser.id, token, role);
+  }
+
+  setTimeout(() => { btn.textContent = '🔍 Re-Analyze'; btn.disabled = false; }, 1000);
+}
+
+// Initial load
+loadUser();
+</script>
+<script src="binary-bg.js"></script>
+</body>
+</html>

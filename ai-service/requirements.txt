@@ -1,0 +1,23 @@
+# PlaceIQ — Python AI Microservice Dependencies
+
+# Web framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# HTTP client (for HuggingFace API calls)
+requests==2.31.0
+httpx==0.26.0
+
+# Data validation
+pydantic==2.6.0
+
+# PDF text extraction
+pypdf==4.0.1
+
+# AI / ML (local model)
+sentence-transformers==2.3.1
+torch==2.2.0          # CPU-only; change to torch+cu118 for GPU
+
+# Utilities
+python-dotenv==1.0.1
+python-multipart==0.0.7

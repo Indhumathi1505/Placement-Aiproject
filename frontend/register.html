@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Register — PlaceIQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050A14;--surface:#0C1422;--card:#111E30;--border:#1E3048;
+  --accent:#4F9EFF;--accent2:#7C6FF7;--accent3:#3DDCB2;
+  --text:#E8F0FF;--muted:#7A95B5;--dim:#3D5472;
+  --font-head:'Plus Jakarta Sans',sans-serif;--font-body:'Inter',sans-serif;--r:12px;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex}
+
+.split-left{width:400px;background:var(--surface);border-right:1px solid var(--border);padding:48px 40px;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto}
+.main-right{margin-left:400px;flex:1;padding:48px;overflow-y:auto;min-height:100vh}
+
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--font-head);font-size:20px;font-weight:800;margin-bottom:48px;text-decoration:none;color:var(--text)}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#4F9EFF,#7C6FF7)}
+.left-title{font-family:var(--font-head);font-size:28px;font-weight:700;letter-spacing:-0.5px;line-height:1.2;margin-bottom:16px}
+.left-sub{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:40px}
+.perk{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px}
+.perk-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-top:2px}
+.perk-icon.blue{background:rgba(79,158,255,0.12)}
+.perk-icon.purple{background:rgba(124,111,247,0.12)}
+.perk-icon.green{background:rgba(61,220,178,0.12)}
+.perk-title{font-weight:500;font-size:14px;margin-bottom:2px}
+.perk-sub{font-size:12px;color:var(--muted)}
+.left-footer{margin-top:auto;padding-top:32px;border-top:1px solid var(--border)}
+.left-footer p{font-size:12px;color:var(--dim)}
+
+/* FORM */
+.form-header{margin-bottom:36px}
+.form-header h1{font-family:var(--font-head);font-size:28px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}
+.form-header p{font-size:14px;color:var(--muted)}
+.form-header p a{color:var(--accent);text-decoration:none}
+
+.step-indicator{display:flex;gap:8px;margin-bottom:36px;align-items:center}
+.step{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.step.active{color:var(--text)}
+.step.done{color:var(--accent3)}
+.step-num{width:28px;height:28px;border-radius:50%;border:1px solid var(--dim);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.step.active .step-num{background:var(--accent);border-color:var(--accent);color:#fff}
+.step.done .step-num{background:var(--accent3);border-color:var(--accent3);color:#050A14}
+.step-div{height:1px;flex:1;background:var(--border)}
+
+.form-section{margin-bottom:36px}
+.section-title{font-family:var(--font-head);font-size:15px;font-weight:600;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid.one{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:6px}
+label{font-size:13px;font-weight:500;color:var(--muted)}
+input,select,textarea{background:var(--card);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--font-body);font-size:14px;padding:12px 14px;transition:all .2s;width:100%;outline:none;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,158,255,0.1)}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+select{cursor:pointer}
+select option{background:var(--card)}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+
+.skills-input{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px;min-height:48px;cursor:text;transition:border .2s}
+.skills-input:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,158,255,0.1)}
+.skill-tag{background:rgba(79,158,255,0.12);border:1px solid rgba(79,158,255,0.2);color:var(--accent);border-radius:100px;padding:4px 10px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.skill-tag button{background:none;border:none;color:currentColor;cursor:pointer;font-size:14px;line-height:1;padding:0;opacity:0.6}
+.skill-tag button:hover{opacity:1}
+.skills-input input{border:none;background:none;padding:0;font-size:13px;min-width:100px;flex:1;color:var(--text)}
+.skills-input input:focus{box-shadow:none;border:none}
+
+.cgpa-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cgpa-display{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:12px}
+.cgpa-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.cgpa-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .3s}
+.cgpa-label{font-family:var(--font-head);font-size:16px;font-weight:700;width:36px;text-align:right}
+
+/* FILE UPLOAD */
+.upload-zone{background:var(--card);border:2px dashed var(--border);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;transition:all .2s}
+.upload-zone:hover{border-color:var(--accent);background:rgba(79,158,255,0.04)}
+.upload-zone.active{border-color:var(--accent3);background:rgba(61,220,178,0.04)}
+.upload-icon{font-size:40px;margin-bottom:12px}
+.upload-title{font-weight:500;font-size:15px;margin-bottom:4px}
+.upload-sub{font-size:13px;color:var(--muted)}
+.upload-types{font-size:11px;color:var(--dim);margin-top:8px}
+.upload-progress{display:none;margin-top:16px}
+.upload-progress.show{display:block}
+.up-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.up-fill{height:100%;background:var(--accent3);border-radius:2px;animation:upload 2s ease forwards}
+@keyframes upload{from{width:0}to{width:100%}}
+.up-name{font-size:12px;color:var(--muted);margin-top:8px}
+
+/* SUBMIT */
+.form-actions{margin-top:8px;display:flex;gap:12px;align-items:center}
+.btn-submit{background:var(--accent);color:#fff;border:none;padding:14px 32px;border-radius:var(--r);font-family:var(--font-body);font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;flex:1;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-submit:hover{background:#3d8ff0;transform:translateY(-1px);box-shadow:0 8px 32px rgba(79,158,255,0.3)}
+.btn-back{background:transparent;color:var(--muted);border:1px solid var(--border);padding:14px 20px;border-radius:var(--r);font-family:var(--font-body);font-size:15px;cursor:pointer;transition:all .2s}
+.btn-back:hover{border-color:var(--dim);color:var(--text)}
+.form-note{font-size:12px;color:var(--dim);text-align:center;margin-top:16px}
+
+/* SUCCESS */
+.success-overlay{display:none;position:fixed;inset:0;background:rgba(5,10,20,0.95);z-index:200;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+.success-overlay.show{display:flex}
+.success-icon{font-size:80px;margin-bottom:24px;animation:pop 0.5s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.success-title{font-family:var(--font-head);font-size:32px;font-weight:700;margin-bottom:12px}
+.success-sub{color:var(--muted);font-size:16px;max-width:400px;margin-bottom:32px;line-height:1.6}
+
+@media(max-width:900px){
+  .split-left{display:none}
+  .main-right{margin-left:0;padding:32px 20px}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="split-left">
+  <a href="index.html" class="logo"><span class="logo-dot"></span>PlaceIQ</a>
+  <div class="left-title">Start Your Placement Journey</div>
+  <p class="left-sub">Create your profile and let AI analyze your strengths, detect gaps, and build a personalized career roadmap.</p>
+
+  <div class="perk">
+    <div class="perk-icon blue">📊</div>
+    <div>
+      <div class="perk-title">Instant Placement Score</div>
+      <div class="perk-sub">Get your probability score within seconds of registering.</div>
+    </div>
+  </div>
+  <div class="perk">
+    <div class="perk-icon purple">🧠</div>
+    <div>
+      <div class="perk-title">AI Skill Gap Detection</div>
+      <div class="perk-sub">Our NLP models identify exactly what's holding you back.</div>
+    </div>
+  </div>
+  <div class="perk">
+    <div class="perk-icon green">🗺️</div>
+    <div>
+      <div class="perk-title">Personalized Roadmap</div>
+      <div class="perk-sub">A month-by-month plan tailored to your target companies.</div>
+    </div>
+  </div>
+
+  <div class="left-footer">
+    <p>Already have an account? <a href="login.html" style="color:var(--accent);text-decoration:none">Sign in here</a></p>
+    <p style="margin-top:8px">By registering, you agree to our Terms of Service and Privacy Policy.</p>
+  </div>
+</div>
+
+<!-- MAIN FORM -->
+<div class="main-right">
+  <div class="form-header">
+    <h1>Create Your Profile</h1>
+    <p>Takes about 5 minutes. The more detail you provide, the more accurate your predictions. Already registered? <a href="login.html">Sign in</a></p>
+  </div>
+
+  <!-- STEP INDICATOR -->
+  <div class="step-indicator">
+    <div class="step done" id="step1-ind"><span class="step-num">✓</span>Basic Info</div>
+    <div class="step-div"></div>
+    <div class="step active" id="step2-ind"><span class="step-num">2</span>Academic</div>
+    <div class="step-div"></div>
+    <div class="step" id="step3-ind"><span class="step-num">3</span>Skills</div>
+    <div class="step-div"></div>
+    <div class="step" id="step4-ind"><span class="step-num">4</span>Resume</div>
+  </div>
+
+  <form id="reg-form" onsubmit="handleSubmit(event)">
+
+    <!-- BASIC INFO -->
+    <div class="form-section">
+      <div class="section-title">👤 Personal Information</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="fname">First Name *</label>
+          <input type="text" id="fname" placeholder="Rahul" required/>
+        </div>
+        <div class="form-group">
+          <label for="lname">Last Name *</label>
+          <input type="text" id="lname" placeholder="Kumar" required/>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" placeholder="rahul@college.edu" required/>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" placeholder="+91 98765 43210"/>
+        </div>
+        <div class="form-group" id="pass-group">
+          <label for="pass">Password *</label>
+          <input type="password" id="pass" placeholder="Create a strong password" required/>
+        </div>
+        <div class="form-group" id="pass2-group">
+          <label for="pass2">Confirm Password *</label>
+          <input type="password" id="pass2" placeholder="Repeat your password" required/>
+        </div>
+        <div class="form-group" style="grid-column: span 2">
+          <label for="pfp-file">Profile Picture (JPG/PNG)</label>
+          <input type="file" id="pfp-file" accept=".jpg,.jpeg,.png"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACADEMIC -->
+    <div class="form-section">
+      <div class="section-title">🎓 Academic Details</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="college">College / University *</label>
+          <input type="text" id="college" placeholder="VIT University" required/>
+        </div>
+        <div class="form-group">
+          <label for="dept">Department / Branch *</label>
+          <select id="dept" required>
+            <option value="">Select Department</option>
+            <option>Computer Science Engineering</option>
+            <option>Information Technology</option>
+            <option>Electronics & Communication</option>
+            <option>Electrical Engineering</option>
+            <option>Mechanical Engineering</option>
+            <option>Data Science</option>
+            <option>Artificial Intelligence & ML</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="year">Current Year</label>
+          <select id="year">
+            <option value="">Select Year</option>
+            <option>1st Year</option>
+            <option>2nd Year</option>
+            <option>3rd Year</option>
+            <option>4th Year</option>
+            <option>Graduated</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="batch">Batch / Passout Year</label>
+          <select id="batch">
+            <option>2025</option>
+            <option>2026</option>
+            <option>2027</option>
+            <option>2028</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <label style="display:block;margin-bottom:8px;font-size:13px;font-weight:500;color:var(--muted)">CGPA / GPA *</label>
+        <div class="cgpa-row">
+          <div class="form-group">
+            <input type="number" id="cgpa" placeholder="8.4" min="0" max="10" step="0.1" oninput="updateCgpa(this.value)" required/>
+          </div>
+          <div class="cgpa-display">
+            <div class="cgpa-bar-track"><div class="cgpa-bar-fill" id="cgpa-bar" style="width:84%"></div></div>
+            <div class="cgpa-label" id="cgpa-label" style="color:var(--accent3)">8.4</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid one" style="margin-top:16px">
+        <div class="form-group">
+          <label for="10th">10th Grade Percentage *</label>
+          <input type="number" id="10th" placeholder="89.4" min="0" max="100" step="0.1"/>
+        </div>
+      </div>
+      <div class="form-grid" style="margin-top:16px">
+        <div class="form-group">
+          <label for="12th">12th Grade Percentage</label>
+          <input type="number" id="12th" placeholder="87.2" min="0" max="100" step="0.1"/>
+        </div>
+        <div class="form-group">
+          <label for="backlog">Active Backlogs</label>
+          <input type="number" id="backlog" placeholder="0" min="0"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div class="form-section">
+      <div class="section-title">💻 Technical Skills</div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Programming Languages (press Enter to add)</label>
+        <div class="skills-input" id="lang-input" onclick="document.getElementById('lang-text').focus()">
+          <div class="skill-tag" style="background:rgba(124,111,247,0.12);border-color:rgba(124,111,247,0.2);color:var(--accent2)">Java <button onclick="removeTag(this)" type="button">×</button></div>
+          <div class="skill-tag" style="background:rgba(124,111,247,0.12);border-color:rgba(124,111,247,0.2);color:var(--accent2)">Python <button onclick="removeTag(this)" type="button">×</button></div>
+          <input type="text" id="lang-text" placeholder="Add language..." onkeydown="addTag(event,'lang-input')"/>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Technical Skills & Frameworks (press Enter to add)</label>
+        <div class="skills-input" id="skills-input" onclick="document.getElementById('skills-text').focus()">
+          <div class="skill-tag">Spring Boot <button onclick="removeTag(this)" type="button">×</button></div>
+          <div class="skill-tag">React.js <button onclick="removeTag(this)" type="button">×</button></div>
+          <div class="skill-tag">MongoDB <button onclick="removeTag(this)" type="button">×</button></div>
+          <input type="text" id="skills-text" placeholder="Add skill..." onkeydown="addTag(event,'skills-input')"/>
+        </div>
+      </div>
+      <div class="form-grid" style="margin-top:0">
+        <div class="form-group">
+          <label for="internships">Number of Internships</label>
+          <input type="number" id="internships" placeholder="1" min="0"/>
+        </div>
+        <div class="form-group">
+          <label for="projects">Number of Projects</label>
+          <input type="number" id="projects" placeholder="3" min="0"/>
+        </div>
+        <div class="form-group">
+          <label for="certs">Certifications Count</label>
+          <input type="number" id="certs" placeholder="2" min="0"/>
+        </div>
+        <div class="form-group">
+          <label for="hackathons">Hackathons Participated</label>
+          <input type="number" id="hackathons" placeholder="0" min="0"/>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label for="internship-desc">Internship / Work Experience Details</label>
+        <textarea id="internship-desc" placeholder="Example: 2-month internship at Infosys as a Java developer. Built REST APIs using Spring Boot..."></textarea>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label for="proj-desc">Key Projects Description</label>
+        <textarea id="proj-desc" placeholder="Example: Built an e-commerce app using Spring Boot, React, MongoDB. Implemented JWT auth, deployed on AWS..."></textarea>
+      </div>
+    </div>
+
+    <!-- RESUME UPLOAD -->
+    <div class="form-section">
+      <div class="section-title">📎 Resume Upload</div>
+      <div class="upload-zone" id="upload-zone" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)" onclick="document.getElementById('resume-file').click()">
+        <div class="upload-icon" id="upload-icon">📄</div>
+        <div class="upload-title" id="upload-title">Drop your resume here</div>
+        <div class="upload-sub" id="upload-sub">or click to browse files</div>
+        <div class="upload-types">Supports: PDF, DOC, DOCX • Max size: 5MB</div>
+        <input type="file" id="resume-file" accept=".pdf,.doc,.docx" style="display:none" onchange="handleFile(this)"/>
+        <div class="upload-progress" id="upload-progress">
+          <div class="up-bar"><div class="up-fill"></div></div>
+          <div class="up-name" id="up-name">Uploading resume.pdf...</div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label for="target-role">Target Job Role</label>
+        <select id="target-role">
+          <option value="">Select your target role</option>
+          <option>Software Developer (SDE)</option>
+          <option>Full Stack Developer</option>
+          <option>Backend Developer</option>
+          <option>Data Scientist</option>
+          <option>Machine Learning Engineer</option>
+          <option>DevOps / Cloud Engineer</option>
+          <option>System Analyst</option>
+          <option>Business Analyst</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label>Target Companies (press Enter to add)</label>
+        <div class="skills-input" id="companies-input" onclick="document.getElementById('companies-text').focus()">
+          <div class="skill-tag" style="background:rgba(61,220,178,0.12);border-color:rgba(61,220,178,0.2);color:var(--accent3)">TCS <button onclick="removeTag(this)" type="button">×</button></div>
+          <div class="skill-tag" style="background:rgba(61,220,178,0.12);border-color:rgba(61,220,178,0.2);color:var(--accent3)">Infosys <button onclick="removeTag(this)" type="button">×</button></div>
+          <input type="text" id="companies-text" placeholder="Add company..." onkeydown="addTag(event,'companies-input','green')"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-back" onclick="window.location='index.html'">← Back</button>
+      <button type="submit" class="btn-submit">🚀 Create Profile & Analyze</button>
+    </div>
+    <div class="form-note">Your data is encrypted and never shared. By continuing you agree to our Privacy Policy.</div>
+  </form>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-icon">🎉</div>
+  <div class="success-title">Profile Created!</div>
+  <div class="success-sub">Your AI analysis is running. We've detected your skills and are calculating your placement probability now.</div>
+  <button class="btn-submit" style="max-width:240px" onclick="window.location='dashboard.html'">View My Dashboard →</button>
+</div>
+
+<script src="js/api-config.js"></script>
+<script>
+
+function updateCgpa(val) {
+  const pct = (parseFloat(val) / 10) * 100;
+  document.getElementById('cgpa-bar').style.width = pct + '%';
+  document.getElementById('cgpa-label').textContent = val || '0';
+  const label = document.getElementById('cgpa-label');
+  if(pct >= 75) label.style.color = 'var(--accent3)';
+  else if(pct >= 60) label.style.color = 'var(--accent)';
+  else label.style.color = '#FF6B6B';
+}
+
+function addTag(event, containerId, color) {
+  if(event.key === 'Enter') {
+    event.preventDefault();
+    const input = event.target;
+    const val = input.value.trim();
+    if(!val) return;
+    const container = document.getElementById(containerId);
+    const tag = document.createElement('div');
+    if(color === 'green') {
+      tag.className = 'skill-tag';
+      tag.style.cssText = 'background:rgba(61,220,178,0.12);border-color:rgba(61,220,178,0.2);color:var(--accent3)';
+    } else {
+      tag.className = 'skill-tag';
+    }
+    tag.innerHTML = val + ' <button onclick="removeTag(this)" type="button">×</button>';
+    container.insertBefore(tag, input);
+    input.value = '';
+  }
+}
+
+function removeTag(btn) { btn.closest('.skill-tag').remove(); }
+
+function dragOver(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.add('active');
+}
+function dragLeave() {
+  document.getElementById('upload-zone').classList.remove('active');
+}
+function dropFile(e) {
+  e.preventDefault();
+  dragLeave();
+  const file = e.dataTransfer.files[0];
+  if(file) processFile(file);
+}
+function handleFile(input) {
+  if(input.files[0]) processFile(input.files[0]);
+}
+function processFile(file) {
+  document.getElementById('upload-icon').textContent = '✅';
+  document.getElementById('upload-title').textContent = file.name;
+  document.getElementById('upload-sub').textContent = (file.size/1024).toFixed(0) + ' KB — Ready for AI analysis';
+  document.getElementById('upload-progress').classList.add('show');
+  document.getElementById('up-name').textContent = 'Processing ' + file.name + '...';
+}
+
+let isEditMode = false;
+let currentStudentId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('token');
+  const urlParams = new URLSearchParams(window.location.search);
+  const editRequested = urlParams.get('edit') === 'true';
+
+  if (token && editRequested) {
+    try {
+      const resp = await fetch('http://localhost:8080/api/students/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (resp.ok) {
+        const s = await resp.json();
+        isEditMode = true;
+        currentStudentId = s.id;
+        
+        document.querySelector('h1').textContent = 'Edit Your Profile';
+        document.querySelector('.form-header p').innerHTML = 'Update your details below. <a href="dashboard.html" style="color:var(--accent);text-decoration:none;">Back to Dashboard</a>';
+        document.querySelector('.left-title').textContent = 'Update Your Profile';
+        document.querySelector('.left-sub').textContent = 'Keep your details up to date for better AI predictions.';
+        document.querySelector('.btn-submit').textContent = '🚀 Update Profile & Analyze';
+        
+        document.getElementById('email').readOnly = true;
+        document.getElementById('pass-group').style.display = 'none';
+        document.getElementById('pass').required = false;
+        document.getElementById('pass2-group').style.display = 'none';
+        document.getElementById('pass2').required = false;
+        
+        if(s.name) {
+          const parts = s.name.split(' ');
+          document.getElementById('fname').value = parts[0] || '';
+          document.getElementById('lname').value = parts.slice(1).join(' ') || '';
+        }
+        if(s.email) document.getElementById('email').value = s.email;
+        if(s.phoneNumber) document.getElementById('phone').value = s.phoneNumber;
+        if(s.college) document.getElementById('college').value = s.college;
+        if(s.department) document.getElementById('dept').value = s.department;
+        if(s.year) document.getElementById('year').value = s.year;
+        if(s.cgpa) { document.getElementById('cgpa').value = s.cgpa; updateCgpa(s.cgpa); }
+        
+        if(s.targetRole) document.getElementById('target-role').value = s.targetRole;
+        if(s.internshipCount) document.getElementById('internships').value = s.internshipCount;
+        if(s.projectCount) document.getElementById('projects').value = s.projectCount;
+        if(s.certificationCount) document.getElementById('certs').value = s.certificationCount;
+
+        // Populate skills and languages into skills-input
+        if(s.skills && s.skills.length > 0) {
+          const skillsInput = document.getElementById('skills-input');
+          const skillsText = document.getElementById('skills-text');
+          skillsInput.querySelectorAll('.skill-tag').forEach(t => t.remove());
+          s.skills.forEach(skill => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-tag';
+            tag.innerHTML = `${skill} <button onclick="removeTag(this)" type="button">×</button>`;
+            skillsInput.insertBefore(tag, skillsText);
+          });
+        }
+        
+        if(s.targetCompanies && s.targetCompanies.length > 0) {
+          const compInput = document.getElementById('companies-input');
+          const compText = document.getElementById('companies-text');
+          compInput.querySelectorAll('.skill-tag').forEach(t => t.remove());
+          s.targetCompanies.forEach(comp => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-tag';
+            tag.style.cssText = 'background:rgba(61,220,178,0.12);border-color:rgba(61,220,178,0.2);color:var(--accent3)';
+            tag.innerHTML = `${comp} <button onclick="removeTag(this)" type="button">×</button>`;
+            compInput.insertBefore(tag, compText);
+          });
+        }
+      }
+    } catch(e) { console.warn("Could not load existing profile", e); }
+  } else {
+    // New Registration Mode or Logged in but explicitly wants to register a new account
+    isEditMode = false;
+    currentStudentId = null;
+    document.getElementById('reg-form').reset();
+    document.getElementById('cgpa-bar').style.width = '0%';
+    document.getElementById('cgpa-label').textContent = '0';
+    // Clear dynamic tags if they were pre-filled in HTML (they are in some PlaceIQ templates)
+    document.querySelectorAll('.skills-input .skill-tag').forEach(t => t.remove());
+  }
+});
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('.btn-submit');
+  btn.textContent = isEditMode ? '⏳ Updating Profile...' : '⏳ Creating Profile...';
+  btn.disabled = true;
+
+  const getTags = (id) => Array.from(document.getElementById(id).querySelectorAll('.skill-tag')).map(t => t.textContent.replace('×', '').trim());
+
+  const payload = {
+    name: document.getElementById('fname').value + ' ' + document.getElementById('lname').value,
+    email: document.getElementById('email').value,
+    department: document.getElementById('dept').value,
+    year: document.getElementById('year').value,
+    college: document.getElementById('college').value,
+    phoneNumber: document.getElementById('phone').value,
+    cgpa: parseFloat(document.getElementById('cgpa').value),
+    skills: getTags('skills-input').concat(getTags('lang-input')),
+    targetRole: document.getElementById('target-role').value,
+    targetCompanies: getTags('companies-input'),
+    internshipCount: parseInt(document.getElementById('internships')?.value || 0),
+    projectCount: parseInt(document.getElementById('projects')?.value || 0),
+    certificationCount: parseInt(document.getElementById('certs')?.value || 0)
+  };
+
+  try {
+    let data;
+    const token = localStorage.getItem('token');
+    if (isEditMode) {
+      const resp = await fetch(`http://localhost:8080/api/students/${currentStudentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error('Update failed');
+      const updatedStudent = await resp.json();
+      data = { ...JSON.parse(localStorage.getItem('user') || '{}'), ...updatedStudent, studentId: updatedStudent.id };
+      data.token = token;
+      localStorage.setItem('user', JSON.stringify(data));
+      document.querySelector('.success-title').textContent = 'Profile Updated!';
+      document.querySelector('.success-sub').textContent = 'Your details have been successfully saved.';
+      
+      // refresh prediction
+      try {
+         await fetch(`http://localhost:8080/api/students/${currentStudentId}/prediction/refresh`, {
+             method: 'POST',
+             headers: { 'Authorization': `Bearer ${token}` }
+         });
+      } catch (err) {}
+    } else {
+      payload.password = document.getElementById('pass').value;
+      payload.rollNumber = (Math.random() * 10000).toFixed(0); 
+      const resp = await fetch(window.PLACE_IQ_API_URL + '/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.message || 'Registration failed');
+      }
+      data = await resp.json();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data));
+    }
+
+    // SECOND STEP: UPLOAD PROFILE PICTURE
+    const pfpFile = document.getElementById('pfp-file').files[0];
+    if (pfpFile) {
+        btn.textContent = '📤 Uploading Profile Picture...';
+        const pfpFormData = new FormData();
+        pfpFormData.append('file', pfpFile);
+        try {
+            const pfpResp = await fetch(`http://localhost:8080/api/students/${data.studentId}/profile-picture`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${data.token}` },
+                body: pfpFormData
+            });
+            if (pfpResp.ok) {
+                const updatedStudent = await pfpResp.json();
+                data.profilePictureUrl = updatedStudent.profilePictureUrl;
+                localStorage.setItem('user', JSON.stringify(data));
+            }
+        } catch (pfpErr) {
+            console.warn("Profile picture upload failed.");
+        }
+    }
+
+    // THIRD STEP: UPLOAD RESUME IF SELECTED
+    const resumeFile = document.getElementById('resume-file').files[0];
+    if (resumeFile) {
+        btn.textContent = '📤 Analyzing Resume...';
+        const formData = new FormData();
+        formData.append('file', resumeFile);
+        
+        try {
+            await fetch(`http://localhost:8080/api/students/${data.studentId}/resume`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${data.token}` },
+                body: formData
+            });
+        } catch (uploadErr) {
+            console.warn("Resume upload failed, but profile was created.");
+        }
+    }
+
+    document.getElementById('success-overlay').classList.add('show');
+  } catch (err) {
+    alert(err.message);
+    btn.textContent = '🚀 Create Profile & Analyze';
+    btn.disabled = false;
+  }
+}
+</script>
+<script src="binary-bg.js"></script>
+</body>
+</html>

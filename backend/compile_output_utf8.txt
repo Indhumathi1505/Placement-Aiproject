@@ -1,0 +1,48 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.placeiq:placement-ai-backend >------------------
+[INFO] Building PlaceIQ Backend 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ placement-ai-backend ---
+[INFO] Deleting C:\Users\indhu\Downloads\PlaceIQ\PlaceIQ\backend\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ placement-ai-backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ placement-ai-backend ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 19 source files with javac [debug release 17] to target\classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/indhu/Downloads/PlaceIQ/PlaceIQ/backend/src/main/java/com/placeiq/config/SecurityConfig.java:[36,19] cannot find symbol
+  symbol:   class CustomUserDetailsService
+  location: class com.placeiq.config.SecurityConfig
+[ERROR] /C:/Users/indhu/Downloads/PlaceIQ/PlaceIQ/backend/src/main/java/com/placeiq/config/SecurityConfig.java:[32,1] cannot find symbol
+  symbol:   class CustomUserDetailsService
+  location: class com.placeiq.config.SecurityConfig
+[INFO] 2 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.392 s
+[INFO] Finished at: 2026-03-17T15:48:20+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project placement-ai-backend: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/indhu/Downloads/PlaceIQ/PlaceIQ/backend/src/main/java/com/placeiq/config/SecurityConfig.java:[36,19] cannot find symbol
+[ERROR]   symbol:   class CustomUserDetailsService
+[ERROR]   location: class com.placeiq.config.SecurityConfig
+[ERROR] /C:/Users/indhu/Downloads/PlaceIQ/PlaceIQ/backend/src/main/java/com/placeiq/config/SecurityConfig.java:[32,1] cannot find symbol
+[ERROR]   symbol:   class CustomUserDetailsService
+[ERROR]   location: class com.placeiq.config.SecurityConfig
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
