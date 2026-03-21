@@ -37,7 +37,7 @@ public class AIService {
     public Prediction analyzeResume(MultipartFile file, Student student) throws IOException {
         // 1. Extract text from PDF
         String resumeText = extractTextFromPdf(file);
-        log.debug("Extracted {} chars from resume PDF", resumeText.length());
+        log.info("Extracted {} chars from resume PDF", resumeText.length());
 
         // 2. Build request payload for Python service
         Map<String, Object> payload = new HashMap<>();
@@ -193,16 +193,26 @@ public class AIService {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> callAiService(String path, Map<String, Object> payload) {
+        // Ensure path doesn't start with / if baseUrl already has it, or vice versa
+        String cleanPath = path.startsWith("/") ? path.substring(1) : path;
+        
         try {
+            log.info("Calling AI service at: {}/{}", "AI_SERVICE", cleanPath);
             return aiWebClient.post()
-                    .uri(path)
+                    .uri(cleanPath)
                     .bodyValue(payload)
                     .retrieve()
                     .bodyToMono(Map.class)
                     .timeout(Duration.ofSeconds(120))
                     .block();
         } catch (Exception e) {
-            log.error("AI service call failed for {} ({}): {}", path, e.getClass().getSimpleName(), e.getMessage());
+            log.error("CRITICAL: AI service call failed for {} | Error: {} | Message: {}", 
+                      cleanPath, e.getClass().getSimpleName(), e.getMessage());
+            if (e.getCause() != null) {
+                log.error("Cause: {}", e.getCause().getMessage());
+            } else if (e.getMessage() != null && e.getMessage().contains("Connection refused")) {
+                log.error("HINT: Check if AI_SERVICE_URL environment variable is correct and ending with /");
+            }
             return buildFallbackResponse();
         }
     }
