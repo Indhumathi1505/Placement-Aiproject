@@ -93,6 +93,8 @@ public class AIService {
                 .studentId(student.getId())
                 .placementProbability(getDouble(aiResponse, "placement_probability"))
                 .readinessScore(getDouble(aiResponse, "readiness_score"))
+                .atsScore(getInt(aiResponse, "ats_score"))
+                .resumeScore(getInt(aiResponse, "resume_score"))
                 .companyProbabilities(castToDoubleMap(aiResponse.get("company_probabilities")))
                 .aiRecommendations(castToStringList(aiResponse.get("recommendations")))
                 .cgpaAtPrediction(student.getCgpa())
@@ -197,7 +199,7 @@ public class AIService {
                     .bodyValue(payload)
                     .retrieve()
                     .bodyToMono(Map.class)
-                    .timeout(Duration.ofSeconds(60))
+                    .timeout(Duration.ofSeconds(120))
                     .block();
         } catch (Exception e) {
             log.error("AI service call failed for {} ({}): {}", path, e.getClass().getSimpleName(), e.getMessage());
