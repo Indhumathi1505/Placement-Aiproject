@@ -369,7 +369,7 @@ async function loadQuestions(count = 30, overrideRole = null, overrideDiff = nul
   const user = await loadUser();
 
   try {
-    const resp = await fetch(window.PLACE_IQ_AI_API_URL + '/api/ai/generate-interview', {
+    const resp = await fetch(window.PLACE_IQ_AI_API_URL + '/generate/interview-questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

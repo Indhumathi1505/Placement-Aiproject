@@ -512,10 +512,10 @@ async function viewStudentDetail(id) {
         let gapHtml = '<span style="color:var(--muted)">No gap data</span>';
         if (gapResp.ok) {
             const gap = await gapResp.json();
-            if (gap.skillGapAnalysis && gap.skillGapAnalysis.length > 0) {
-                // Parse skill-gap analysis items (which are usually "Missing: Skill" or similar)
-                gapHtml = gap.skillGapAnalysis.slice(0,3).map(str => 
-                  `<span style="display:inline-block;font-size:11px;padding:3px 8px;background:rgba(255,107,107,0.1);color:#FF6B6B;border-radius:100px;margin:2px">${str.split(':')[0]}</span>`
+            if (gap.missingSkills && gap.missingSkills.length > 0) {
+                // Parse skill-gap analysis items
+                gapHtml = gap.missingSkills.slice(0,3).map(str => 
+                  `<span style="display:inline-block;font-size:11px;padding:3px 8px;background:rgba(255,107,107,0.1);color:#FF6B6B;border-radius:100px;margin:2px">${str}</span>`
                 ).join('');
             }
         }
