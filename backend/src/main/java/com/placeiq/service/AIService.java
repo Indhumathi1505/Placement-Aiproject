@@ -28,6 +28,9 @@ public class AIService {
     private final PredictionRepository predictionRepository;
     private final SkillGapRepository skillGapRepository;
 
+    @org.springframework.beans.factory.annotation.Value("${ai.service.url}")
+    private String aiServiceUrl;
+
     // ─── RESUME ANALYSIS ──────────────────────────────────────────────────────
 
     /**
@@ -197,7 +200,7 @@ public class AIService {
         String cleanPath = path.startsWith("/") ? path.substring(1) : path;
         
         try {
-            log.info("Calling AI service at: {}/{}", "AI_SERVICE", cleanPath);
+            log.info("Calling AI service at: {}/{}", aiServiceUrl, cleanPath);
             return aiWebClient.post()
                     .uri(cleanPath)
                     .bodyValue(payload)
@@ -206,18 +209,13 @@ public class AIService {
                     .timeout(Duration.ofSeconds(120))
                     .block();
         } catch (Exception e) {
-            log.error("CRITICAL: AI service call failed for {} | Error: {} | Message: {}", 
-                      cleanPath, e.getClass().getSimpleName(), e.getMessage());
-            if (e.getCause() != null) {
-                log.error("Cause: {}", e.getCause().getMessage());
-            } else if (e.getMessage() != null && e.getMessage().contains("Connection refused")) {
-                log.error("HINT: Check if AI_SERVICE_URL environment variable is correct and ending with /");
-            }
-            return buildFallbackResponse();
+            log.error("CRITICAL: AI service call failed for {}/{} | Error: {}", 
+                      aiServiceUrl, cleanPath, e.getMessage());
+            return buildFallbackResponse(e.getMessage());
         }
     }
 
-    private Map<String, Object> buildFallbackResponse() {
+    private Map<String, Object> buildFallbackResponse(String error) {
         Map<String, Object> fallback = new HashMap<>();
         fallback.put("placement_probability", 0.5);
         fallback.put("readiness_score", 5.0);
@@ -231,7 +229,7 @@ public class AIService {
         fallback.put("recommended_courses", List.of());
         fallback.put("gap_score", 0.5);
         fallback.put("estimated_weeks", 8);
-        fallback.put("summary", "AI service unavailable. Please try again later.");
+        fallback.put("summary", "AI Analysis was unable to connect to the smart engine. ERROR: " + error);
         fallback.put("recommendations", List.of());
         fallback.put("improvement_tips", List.of());
         return fallback;
