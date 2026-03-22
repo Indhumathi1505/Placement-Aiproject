@@ -97,6 +97,15 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .btn-back:hover{border-color:var(--dim);color:var(--text)}
 .form-note{font-size:12px;color:var(--dim);text-align:center;margin-top:16px}
 
+/* PASSWORD STRENGTH */
+.pass-msg{font-size:11px;margin-top:4px;display:none;align-items:center;gap:4px}
+.pass-msg.show{display:flex}
+.pass-msg.error{color:#FF6B6B}
+.pass-msg.success{color:var(--accent3)}
+.strength-meter{height:4px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden;display:none}
+.strength-meter.show{display:block}
+.strength-fill{height:100%;width:0;transition:all .3s}
+
 /* SUCCESS */
 .success-overlay{display:none;position:fixed;inset:0;background:rgba(5,10,20,0.95);z-index:200;align-items:center;justify-content:center;flex-direction:column;text-align:center}
 .success-overlay.show{display:flex}
@@ -190,7 +199,9 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
         </div>
         <div class="form-group" id="pass-group">
           <label for="pass">Password *</label>
-          <input type="password" id="pass" placeholder="Create a strong password" required/>
+          <input type="password" id="pass" placeholder="Create a strong password" required oninput="checkStrength(this.value)"/>
+          <div class="strength-meter" id="strength-meter"><div class="strength-fill" id="strength-fill"></div></div>
+          <div class="pass-msg" id="pass-msg">Must contain uppercase, number, and special char (!@#$%)</div>
         </div>
         <div class="form-group" id="pass2-group">
           <label for="pass2">Confirm Password *</label>
@@ -380,6 +391,34 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 
 <script src="js/api-config.js"></script>
 <script>
+function checkStrength(p) {
+  const meter = document.getElementById('strength-meter');
+  const fill = document.getElementById('strength-fill');
+  const msg = document.getElementById('pass-msg');
+  
+  if(!p) { meter.classList.remove('show'); msg.classList.remove('show'); return; }
+  
+  meter.classList.add('show');
+  msg.classList.add('show');
+  
+  let score = 0;
+  if(p.length >= 8) score++;
+  if(/[A-Z]/.test(p)) score++;
+  if(/[0-9]/.test(p)) score++;
+  if(/[!@#$%^&*(),.?":{}|<>]/.test(p)) score++;
+  
+  const colors = ['#FF6B6B', '#FFB347', '#4F9EFF', '#3DDCB2'];
+  fill.style.width = (score / 4 * 100) + '%';
+  fill.style.background = colors[score-1] || colors[0];
+  
+  if(score === 4) {
+    msg.textContent = 'Strong password! ✨';
+    msg.className = 'pass-msg show success';
+  } else {
+    msg.textContent = 'Must contain uppercase, number, and special char (!@#$%)';
+    msg.className = 'pass-msg show error';
+  }
+}
 
 function updateCgpa(val) {
   const pct = (parseFloat(val) / 10) * 100;

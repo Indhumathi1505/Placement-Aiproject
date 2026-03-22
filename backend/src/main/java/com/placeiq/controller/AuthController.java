@@ -22,8 +22,20 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthDTO.AuthResponse> register(@Valid @RequestBody AuthDTO.RegisterRequest request) {
+    public ResponseEntity<AuthDTO.AuthResponse> register(@RequestBody AuthDTO.RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody Map<String, String> request) {
+        authService.processForgotPassword(request.get("email"));
+        return ResponseEntity.ok(Map.of("message", "Reset link sent to your email"));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> request) {
+        authService.resetPassword(request.get("token"), request.get("password"));
+        return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }
 
     @GetMapping("/health")

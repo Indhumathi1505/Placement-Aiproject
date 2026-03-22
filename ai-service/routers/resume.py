@@ -242,9 +242,13 @@ def analyze_resume(req: ResumeAnalysisRequest):
     # Merge LLM-extracted skills with heuristics-extracted skills
     llm_skills = ats_results.get("extracted_skills", [])
     if llm_skills:
-        # Use LLM skills as primary if available, but keep heuristics for safety
-        all_skills = list(set(extracted_skills) | set(llm_skills))
-        # Ensure we don't have empty strings or weird chars
+        # Filter LLM skills against ALL_KNOWN_SKILLS to prevent hallucinations
+        # We also sanitize them (strip, title case)
+        known_set = {s.lower().replace("\\", "") for s in ALL_KNOWN_SKILLS}
+        filtered_llm = [s for s in llm_skills if s.lower() in known_set]
+        
+        # Use filtered LLM skills as primary if available, but keep heuristics for safety
+        all_skills = list(set(extracted_skills) | set(filtered_llm))
         all_skills = [s.strip().title() for s in all_skills if len(s.strip()) > 1]
     else:
         all_skills = [s.title() for s in extracted_skills]
