@@ -1,3 +1,7 @@
+package com.placeiq.service;
+
+import com.placeiq.dto.AuthDTO;
+import com.placeiq.model.Student;
 import com.placeiq.model.PasswordResetToken;
 import com.placeiq.repository.PasswordResetTokenRepository;
 import com.placeiq.repository.StudentRepository;
@@ -90,6 +94,8 @@ public class AuthService {
                 student.getDepartment(),
                 student.getProfilePictureUrl()
         );
+    }
+
     private void validatePassword(String password) {
         if (password == null || password.length() < 8) {
             throw new IllegalArgumentException("Password must be at least 8 characters long");
