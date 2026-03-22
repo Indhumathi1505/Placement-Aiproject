@@ -7,6 +7,7 @@ Can be replaced with a trained sklearn/XGBoost model later.
 
 from typing import List, Optional, Dict
 import math
+import re
 
 # ─── ROLE → REQUIRED SKILLS MAP ───────────────────────────────────────────────
 ROLE_SKILLS: Dict[str, List[str]] = {
