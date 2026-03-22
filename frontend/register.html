@@ -427,29 +427,30 @@ function updateCgpa(val) {
   document.getElementById('cgpa-bar').style.width = pct + '%';
   document.getElementById('cgpa-label').textContent = val || '0';
   const label = document.getElementById('cgpa-label');
-  if(pct >= 75) label.style.color = 'var(--accent3)';
-  else if(pct >= 60) label.style.color = 'var(--accent)';
+  if(pct >= 8.5) label.style.color = 'var(--accent3)';
+  else if(pct >= 7.5) label.style.color = 'var(--accent)';
   else label.style.color = '#FF6B6B';
 }
 
-function addTag(event, containerId, color) {
-  if(event.key === 'Enter') {
-    event.preventDefault();
-    const input = event.target;
-    const val = input.value.trim();
-    if(!val) return;
-    const container = document.getElementById(containerId);
-    const tag = document.createElement('div');
-    if(color === 'green') {
-      tag.className = 'skill-tag';
-      tag.style.cssText = 'background:rgba(61,220,178,0.12);border-color:rgba(61,220,178,0.2);color:var(--accent3)';
-    } else {
-      tag.className = 'skill-tag';
-    }
-    tag.innerHTML = val + ' <button onclick="removeTag(this)" type="button">×</button>';
-    container.insertBefore(tag, input);
-    input.value = '';
+function removeTag(btn) {
+  btn.parentElement.remove();
+}
+
+function addTag(event, containerId, color, valOverride = null) {
+  const val = valOverride || (event && event.target.value.trim());
+  if(!valOverride && event && event.key !== 'Enter') return;
+  if(!valOverride && event) { event.preventDefault(); event.target.value = ''; }
+  if(!val) return;
+  
+  const container = document.getElementById(containerId);
+  const input = container.querySelector('input');
+  const tag = document.createElement('div');
+  tag.className = 'skill-tag';
+  if(color === 'green') {
+    tag.style.cssText = 'background:rgba(61,220,178,0.12);border-color:rgba(61,220,178,0.2);color:var(--accent3)';
   }
+  tag.innerHTML = `${val} <button onclick="removeTag(this)" type="button">×</button>`;
+  container.insertBefore(tag, input);
 }
 
 function removeTag(btn) { btn.closest('.skill-tag').remove(); }
@@ -670,12 +671,19 @@ async function handleSubmit(e) {
     }
 
     document.getElementById('success-overlay').classList.add('show');
+    
+    // Redirect after a short delay if editing
+    if (isEditMode) {
+        setTimeout(() => window.location.href = 'profile.html', 1500);
+    }
   } catch (err) {
     alert(err.message);
-    btn.textContent = '🚀 Create Profile & Analyze';
+    btn.textContent = isEditMode ? '💾 Save Changes' : '🚀 Create Profile & Analyze';
     btn.disabled = false;
   }
 }
+
+// EDIT MODE PRE-FILL
 </script>
 <script src="binary-bg.js"></script>
 </body>

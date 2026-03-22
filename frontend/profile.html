@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Profile — PlaceIQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#050A14;--surface:#0C1422;--card:#111E30;--border:#1E3048;--accent:#4F9EFF;--accent2:#7C6FF7;--accent3:#3DDCB2;--text:#E8F0FF;--muted:#7A95B5;--dim:#3D5472;--font-head:'Plus Jakarta Sans',sans-serif;--font-body:'Inter',sans-serif;--r:16px;--sidebar:260px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sidebar-nav{flex:1;padding:16px 12px}
+.nav-section{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);padding:8px 8px 4px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;transition:all .2s;margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
+.nav-item.active{background:rgba(79,158,255,0.1);color:var(--accent);font-weight:500}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-user{padding:20px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;border:1px solid var(--border)}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:rgba(79,158,255,0.2);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--accent);font-size:13px;flex-shrink:0}
+.user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.user-dept{font-size:11px;color:var(--dim)}
+
+.main{margin-left:var(--sidebar);flex:1;padding:0;background:radial-gradient(circle at top right, rgba(79,158,255,0.05), transparent 40%);display:flex;flex-direction:column}
+.topbar{height:72px;padding:0 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(5,10,20,0.8);backdrop-filter:blur(20px);position:sticky;top:0;z-index:40}
+.topbar-title{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--text)}
+.content-area{padding:40px;flex:1}
+.profile-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.profile-title{font-family:var(--font-head);font-size:28px;font-weight:800;letter-spacing:-0.5px}
+.btn-edit{background:linear-gradient(135deg, var(--accent), var(--accent2));color:#fff;border:none;padding:12px 24px;border-radius:10px;font-family:var(--font-head);font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s}
+.btn-edit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(79,158,255,0.25)}
+
+.profile-grid{display:grid;grid-template-columns:repeat(12, 1fr);gap:24px}
+.section-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;overflow:hidden;position:relative}
+.section-card.full{grid-column: span 12}
+.section-card.half{grid-column: span 6}
+.section-label{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.profile-overview{text-align:center;padding:40px 24px}
+.large-avatar{width:120px;height:120px;border-radius:50%;background:rgba(79,158,255,0.1);margin:0 auto 24px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:800;color:var(--accent);border:3px solid var(--border);object-fit:cover}
+.profile-name{font-family:var(--font-head);font-size:24px;font-weight:800;margin-bottom:4px}
+.profile-email{color:var(--muted);font-size:14px;margin-bottom:16px}
+.profile-badge{display:inline-flex;padding:6px 16px;border-radius:100px;background:rgba(61,220,178,0.1);color:var(--accent3);font-size:12px;font-weight:700;border:1px solid rgba(61,220,178,0.2)}
+
+.detail-row{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:20px}
+.detail-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.detail-val{font-size:15px;font-weight:500;color:var(--text)}
+
+.skills-list{display:flex;flex-wrap:wrap;gap:8px}
+.skill-tag{padding:6px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:100px;font-size:13px;color:var(--muted)}
+
+.empty-state{text-align:center;padding:48px;color:var(--dim)}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="PlaceIQ Logo" style="height:32px;width:auto">
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="resume.html" class="nav-item"><span class="nav-icon">📄</span>Resume Analyzer</a>
+    <div class="nav-section">Career Tools</div>
+    <a href="skill-gap.html" class="nav-item"><span class="nav-icon">🧩</span>Skill Gap Analysis</a>
+    <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span>Learning Roadmap</a>
+    <a href="interview.html" class="nav-item"><span class="nav-icon">🎤</span>Mock Interview</a>
+    <a href="chatbot.html" class="nav-item"><span class="nav-icon">🤖</span>AI Assistant</a>
+    <a href="profile.html" class="nav-item active"><span class="nav-icon">👤</span>My Profile</a>
+    <a href="login.html" class="nav-item"><span class="nav-icon">🚪</span>Sign Out</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-card">
+      <div class="user-avatar" id="sidebar-avatar">??</div>
+      <div>
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-dept" id="sidebar-dept">...</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">Student Profile</div>
+    <div class="topbar-right">
+      <button class="btn-ghost-sm" onclick="window.location='dashboard.html'" style="background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">📊 Dashboard</button>
+    </div>
+  </div>
+  
+  <div class="content-area">
+    <div class="profile-header">
+      <h1 class="profile-title">My Profile</h1>
+      <button class="btn-edit" onclick="window.location='register.html?edit=true'">
+        <span>✏️</span> Edit Profile
+      </button>
+    </div>
+
+  <div class="profile-grid">
+    <!-- OVERVIEW CARD -->
+    <div class="section-card half" style="grid-row: span 2">
+      <div class="profile-overview">
+        <div class="large-avatar" id="main-avatar">??</div>
+        <h2 class="profile-name" id="main-name">...</h2>
+        <div class="profile-email" id="main-email">...</div>
+        <div class="profile-badge">Student</div>
+      </div>
+      
+      <div class="section-label">Academic Details</div>
+      <div class="detail-row">
+        <div class="detail-item">
+          <div class="detail-label">Department</div>
+          <div class="detail-val" id="val-dept">...</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Year of Study</div>
+          <div class="detail-val" id="val-year">...</div>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-item">
+          <div class="detail-label">CGPA</div>
+          <div class="detail-val" id="val-cgpa">...</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Roll Number</div>
+          <div class="detail-val" id="val-roll">...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAREER TARGETS -->
+    <div class="section-card half">
+      <div class="section-label">Career Targets</div>
+      <div class="detail-row">
+        <div class="detail-item">
+          <div class="detail-label">Target Role</div>
+          <div class="detail-val" id="val-role">...</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">College</div>
+          <div class="detail-val" id="val-college">...</div>
+        </div>
+      </div>
+      <div class="detail-label">Target Companies</div>
+      <div class="skills-list" id="val-companies">
+        <!-- Companies will be injected here -->
+      </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div class="section-card half">
+      <div class="section-label">Verified Skills</div>
+      <div class="skills-list" id="val-skills">
+        <!-- Skills will be injected here -->
+      </div>
+    </div>
+
+    <!-- CONTACT & ADDITIONAL -->
+    <div class="section-card full">
+      <div class="section-label">Contact & Other Info</div>
+      <div class="detail-row" style="grid-template-columns: repeat(4, 1fr)">
+        <div class="detail-item">
+          <div class="detail-label">Phone Number</div>
+          <div class="detail-val" id="val-phone">...</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Internships</div>
+          <div class="detail-val" id="val-interns">0</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Projects</div>
+          <div class="detail-val" id="val-projects">0</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Certifications</div>
+          <div class="detail-val" id="val-certs">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/api-config.js"></script>
+<script>
+async function loadProfile() {
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = 'login.html'; return; }
+
+  try {
+    const resp = await fetch(window.PLACE_IQ_API_URL + '/api/students/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!resp.ok) throw new Error('Failed to fetch profile');
+    const s = await resp.json();
+
+    // Sidebars & Header
+    const initials = s.name.split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2);
+    document.getElementById('sidebar-name').textContent = s.name;
+    document.getElementById('sidebar-dept').textContent = s.department || 'Student';
+    
+    // PFPs
+    const pfpUrl = s.profilePictureUrl ? (s.profilePictureUrl.startsWith('http') ? s.profilePictureUrl : (window.PLACE_IQ_API_URL + s.profilePictureUrl).replace(/([^:])\/\//g, '$1/')) : null;
+    if (pfpUrl) {
+      document.getElementById('sidebar-avatar').innerHTML = `<img src="${pfpUrl}" onerror="this.parentElement.textContent='${initials}'" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+      document.getElementById('main-avatar').innerHTML = `<img src="${pfpUrl}" onerror="this.parentElement.textContent='${initials}'" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+    } else {
+      document.getElementById('sidebar-avatar').textContent = initials;
+      document.getElementById('main-avatar').textContent = initials;
+    }
+
+    // Main Details
+    document.getElementById('main-name').textContent = s.name;
+    document.getElementById('main-email').textContent = s.email;
+    document.getElementById('val-dept').textContent = s.department || 'N/A';
+    document.getElementById('val-year').textContent = s.year || 'N/A';
+    document.getElementById('val-cgpa').textContent = s.cgpa ? s.cgpa.toFixed(2) : 'N/A';
+    document.getElementById('val-roll').textContent = s.rollNumber || 'N/A';
+    document.getElementById('val-role').textContent = s.targetRole || 'N/A';
+    document.getElementById('val-college').textContent = s.college || 'N/A';
+    document.getElementById('val-phone').textContent = s.phoneNumber || 'N/A';
+    document.getElementById('val-interns').textContent = s.internshipCount || 0;
+    document.getElementById('val-projects').textContent = s.projectCount || 0;
+    document.getElementById('val-certs').textContent = s.certificationCount || 0;
+
+    // Skills
+    const skillsCont = document.getElementById('val-skills');
+    skillsCont.innerHTML = '';
+    if (s.skills && s.skills.length > 0) {
+      s.skills.forEach(skill => {
+        skillsCont.innerHTML += `<div class="skill-tag">${skill}</div>`;
+      });
+    } else {
+      skillsCont.innerHTML = '<div class="empty-state">No verified skills. Upload your resume.</div>';
+    }
+
+    // Companies
+    const compCont = document.getElementById('val-companies');
+    compCont.innerHTML = '';
+    if (s.targetCompanies && s.targetCompanies.length > 0) {
+      s.targetCompanies.forEach(c => {
+        compCont.innerHTML += `<div class="skill-tag" style="background:rgba(61,220,178,0.08);color:var(--accent3);border-color:rgba(61,220,178,0.2)">${c}</div>`;
+      });
+    } else {
+      compCont.innerHTML = '<div class="empty-state">No target companies specified.</div>';
+    }
+
+  } catch (err) {
+    console.error(err);
+    // window.location.href = 'login.html';
+  }
+}
+
+loadProfile();
+</script>
+</body>
+</html>
