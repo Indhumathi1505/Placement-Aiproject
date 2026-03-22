@@ -30,6 +30,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 .profile-title{font-family:var(--font-head);font-size:28px;font-weight:800;letter-spacing:-0.5px}
 .btn-edit{background:linear-gradient(135deg, var(--accent), var(--accent2));color:#fff;border:none;padding:12px 24px;border-radius:10px;font-family:var(--font-head);font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s}
 .btn-edit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(79,158,255,0.25)}
+.btn-email{background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--border);padding:12px 24px;border-radius:10px;font-family:var(--font-head);font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s}
+.btn-email:hover:not(:disabled){background:rgba(255,255,255,0.1);transform:translateY(-2px)}
+.btn-email:disabled{opacity:0.6;cursor:not-allowed}
 
 .profile-grid{display:grid;grid-template-columns:repeat(12, 1fr);gap:24px}
 .section-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;overflow:hidden;position:relative}
@@ -95,9 +98,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
   <div class="content-area">
     <div class="profile-header">
       <h1 class="profile-title">My Profile</h1>
-      <button class="btn-edit" onclick="window.location='register.html?edit=true'">
-        <span>✏️</span> Edit Profile
-      </button>
+      <div style="display:flex;gap:12px">
+        <button class="btn-email" id="email-btn" onclick="sendEmailReport()">
+          <span>📧</span> Email Career Report
+        </button>
+        <button class="btn-edit" onclick="window.location='register.html?edit=true'">
+          <span>✏️</span> Edit Profile
+        </button>
+      </div>
     </div>
 
   <div class="profile-grid">
@@ -252,6 +260,41 @@ async function loadProfile() {
   } catch (err) {
     console.error(err);
     // window.location.href = 'login.html';
+  }
+}
+
+async function sendEmailReport() {
+  const btn = document.getElementById('email-btn');
+  const token = localStorage.getItem('token');
+  if (!token || !btn) return;
+
+  btn.disabled = true;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<span>⏳</span> Sending Report...';
+
+  try {
+    const resp = await fetch(window.PLACE_IQ_API_URL + '/api/reports/send-email', {
+      method: 'POST',
+      headers: { 
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (resp.ok) {
+        btn.innerHTML = '<span>✅</span> Report Sent!';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }, 3000);
+    } else {
+        const errText = await resp.text();
+        throw new Error(errText || 'Failed to send email');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Failed to send email. please try again later.');
+    btn.disabled = false;
+    btn.innerHTML = originalText;
   }
 }
 
