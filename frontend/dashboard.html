@@ -527,37 +527,52 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
     }
   }
 
-  function renderTrendChart(studentObj) {
+  async function renderTrendChart(studentObj) {
     const ctx = document.getElementById('trendChart').getContext('2d');
+    const token = localStorage.getItem('token');
     
-    // Build data based on roadmap tasks progress
     let labels = [];
     let data = [];
     
-    if (studentObj.roadmapTasksProgress && Object.keys(studentObj.roadmapTasksProgress).length > 0) {
-       // Convert map to sorted array of completion milestones (mock time progression based on task count)
-       const keys = Object.keys(studentObj.roadmapTasksProgress);
-       let completedCount = 0;
-       labels.push("Start");
-       data.push(40); // Base score
+    try {
+      const resp = await fetch(window.PLACE_IQ_API_URL + `/api/students/${studentObj.id}/prediction/history`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (resp.ok) {
+        const history = await resp.json();
+        if (history && history.length > 0) {
+          // Sort by date and take last 6
+          const sorted = history.sort((a,b) => new Date(a.predictedAt) - new Date(b.predictedAt)).slice(-6);
+          labels = sorted.map(h => new Date(h.predictedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+          data = sorted.map(h => Math.round(h.placementProbability * 100));
+        }
+      }
+    } catch (e) {
+      console.warn("Could not fetch history, falling back to roadmap tasks", e);
+    }
 
-       keys.forEach((k, index) => {
-           if (studentObj.roadmapTasksProgress[k]) {
-               completedCount++;
-               labels.push(`Point ${index+1}`);
-               let currentScore = 40 + (completedCount * 3); // Arbitrary score bump per task
-               data.push(Math.min(currentScore, 100));
-           }
-       });
-       
-       // Ensure at least 3 points for a good looking chart
-       if (data.length < 3) {
-           labels.push("Current");
-           data.push(data[data.length-1]);
-       }
-    } else {
-       labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Current'];
-       data = [40, 42, 45, 45, 45]; // Flatline if no progress
+    if (data.length === 0) {
+      if (studentObj.roadmapTasksProgress && Object.keys(studentObj.roadmapTasksProgress).length > 0) {
+         const keys = Object.keys(studentObj.roadmapTasksProgress);
+         let completedCount = 0;
+         labels.push("Start");
+         data.push(40);
+         keys.forEach((k, index) => {
+             if (studentObj.roadmapTasksProgress[k]) {
+                 completedCount++;
+                 labels.push(`Point ${index+1}`);
+                 let currentScore = 40 + (completedCount * 3);
+                 data.push(Math.min(currentScore, 100));
+             }
+         });
+         if (data.length < 3) {
+             labels.push("Current");
+             data.push(data[data.length-1]);
+         }
+      } else {
+         labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Current'];
+         data = [40, 42, 45, 45, 45];
+      }
     }
 
     new Chart(ctx, {
@@ -581,7 +596,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          y: { min: 30, max: 100, ticks: { callback: v => v + '%' } },
+          y: { min: 0, max: 100, ticks: { callback: v => v + '%' } },
           x: { grid: { display: false } }
         }
       }
@@ -646,8 +661,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
     const colors = ['var(--accent3)', 'var(--accent2)', 'var(--accent)', '#FFB347', '#FF6B6B'];
 
     comps.forEach(([company, prob], index) => {
-        const p = (prob * 100).toFixed(0);
-        let color = '#3DDCB2'; // High 
+        // Backend now returns percentage 0-100 correctly, no need to multiply by 100 again
+        const p = prob.toFixed(0);
+        let color = '#3DDCB2'; // High (>= 75)
         if(p < 75) color = '#4F9EFF';
         if(p < 60) color = '#7C6FF7';
         if(p < 50) color = '#FFB347';

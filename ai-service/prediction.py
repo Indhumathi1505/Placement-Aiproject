@@ -42,10 +42,19 @@ def compute_skill_match(student_skills: List[str], required_skills: List[str]) -
     if not required_skills:
         return 0.5
     student_lower = {s.lower().strip() for s in student_skills}
-    matched = sum(
-        1 for skill in required_skills
-        if any(skill.lower() in s or s in skill.lower() for s in student_lower)
-    )
+    matched = 0
+    for skill in required_skills:
+        skill_l = skill.lower().strip()
+        # Exact match
+        if skill_l in student_lower:
+            matched += 1
+            continue
+        # Partial match only if it's a significant part or specific multi-word skill
+        # Using a simple heuristic: if the required skill is a substring and stands as a 'word'
+        for s in student_lower:
+            if re.search(rf"\b{re.escape(skill_l)}\b", s):
+                matched += 1
+                break
     return matched / len(required_skills)
 
 

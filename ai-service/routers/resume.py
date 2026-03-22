@@ -28,22 +28,26 @@ HF_INFERENCE_URL = "https://api-inference.huggingface.co/models"
 # We use keys that are specific enough for word-boundary matching
 ALL_KNOWN_SKILLS = [
     # Languages
-    "java", "python", "javascript", "typescript", "c\\+\\+", "c#", "go", "rust", "kotlin", "ruby", "php", "swift", "scala",
-    # Frameworks
-    "spring boot", "spring", "django", "fastapi", "flask", "express", "node\\.js", "nestjs",
-    "react", "angular", "vue", "next\\.js", "svelte", "html", "css", "tailwind", "bootstrap",
+    "java", "python", "javascript", "typescript", "c\\+\\+", "c#", "go", "rust", "kotlin", "ruby", "php", "swift", "scala", "dart", "r", "julia", "lua",
+    # Frameworks & Libraries
+    "spring boot", "spring", "django", "fastapi", "flask", "express", "node\\.js", "nestjs", "laravel", "ruby on rails", "asp\\.net",
+    "react", "angular", "vue", "next\\.js", "svelte", "html", "css", "tailwind", "bootstrap", "sass", "less", "redux", "jquery",
+    "tensorflow", "pytorch", "scikit-learn", "keras", "pandas", "numpy", "matplotlib", "seaborn", "opencv", "nltk", "spacy",
     # Databases
-    "mysql", "postgresql", "mongodb", "redis", "elasticsearch", "cassandra", "dynamodb", "oracle", "firebase",
+    "mysql", "postgresql", "mongodb", "redis", "elasticsearch", "cassandra", "dynamodb", "oracle", "firebase", "sqlite", "mariadb", "neo4j",
     # Cloud & DevOps
-    "aws", "gcp", "azure", "docker", "kubernetes", "terraform", "ansible", "cloud native", "serverless",
-    "git", "github", "gitlab", "ci/cd", "jenkins", "github actions", "circleci",
+    "aws", "gcp", "azure", "docker", "kubernetes", "terraform", "ansible", "cloud native", "serverless", "lambda", "ec2", "s3",
+    "git", "github", "gitlab", "ci/cd", "jenkins", "github actions", "circleci", "travis ci", "bitbucket",
+    # Mobile & Game Dev
+    "flutter", "react native", "android", "ios", "unity", "unreal engine",
     # Core CS & Tools
-    "dsa", "data structures", "algorithms", "system design", "rest api", "graphql", "grpc",
-    "machine learning", "deep learning", "tensorflow", "pytorch", "scikit-learn",
-    "pandas", "numpy", "matplotlib", "seaborn", "sql", "nosql", "junit", "mockito", "selenium", "pytest",
-    "maven", "gradle", "linux", "bash", "shell scripting", "microservices", "kafka", "rabbitmq",
+    "dsa", "data structures", "algorithms", "system design", "rest api", "graphql", "grpc", "soap",
+    "machine learning", "deep learning", "nlp", "computer vision", "reinforcement learning",
+    "sql", "nosql", "junit", "mockito", "selenium", "pytest", "jest", "mocha", "chai",
+    "maven", "gradle", "linux", "bash", "shell scripting", "unix", "powershell",
+    "microservices", "kafka", "rabbitmq", "activemq", "mqtt",
     "jwt", "oauth", "oops", "object oriented programming", "design patterns", "agile", "scrum", "kanban",
-    "snowflake", "apache spark", "hadoop", "bi", "data engineering", "cypress", "playwright",
+    "snowflake", "apache spark", "hadoop", "bi", "data engineering", "cypress", "playwright", "postman",
 ]
 
 ATS_KEYWORDS = [
@@ -75,9 +79,16 @@ def extract_skills_from_text(text: str) -> List[str]:
     text_lower = text.lower()
     extracted = []
     for skill in ALL_KNOWN_SKILLS:
-        # We escape special chars like ++ in C++ and . in node.js during set-up
-        # Use more comprehensive word boundary handling for skills with symbols
-        pattern = rf"(?i)\b{skill}\b"
+        # Handle start boundary
+        has_symbol_start = re.search(r'^[^a-zA-Z0-9]', skill)
+        start_boundary = r"(?<!\w)" if has_symbol_start else r"\b"
+        
+        # Handle end boundary
+        has_symbol_end = re.search(r'[^a-zA-Z0-9]$', skill)
+        end_boundary = r"(?!\w)" if has_symbol_end else r"\b"
+        
+        pattern = rf"(?i){start_boundary}{skill}{end_boundary}"
+            
         if re.search(pattern, text_lower):
             # Clean up the display name (remove escape backslashes)
             display_name = skill.replace("\\", "")
@@ -181,20 +192,24 @@ def analyze_resume(req: ResumeAnalysisRequest):
     # 3. AI Analysis with Multi-Model Fallback
     ats_results = None
     if hf_token:
-        prompt = f"""Evaluate this {target_role} resume. Context: CGPA {cgpa}.
+        prompt = f"""Evaluate this {target_role} resume with high precision. Context: CGPA {cgpa}.
         
-        Analyze the provided resume text and provide a detailed evaluation.
+        Analyze the provided resume text and provide a detailed evaluation. Focus on technical competence, project complexity, and role alignment.
         
-        IMPORTANT: For "Extracted Skills", ONLY list technical skills that are EXPLICITLY mentioned in the resume text. DO NOT add any skills that you think the candidate might have or should have based on their role. If a skill is not in the text, DO NOT include it.
+        CRITICAL: For "Extracted Skills", ONLY list core technical skills (languages, frameworks, tools, databases) that are EXPLICITLY mentioned in the resume text. 
+        - DO NOT hallucinate. 
+        - DO NOT include soft skills.
+        - DO NOT include skills that are "implied" but not stated.
+        - Use standard professional naming (e.g., "React" instead of "ReactJS").
         
         Format your response EXACTLY like this:
         ATS Score: XX/100
-        Strengths: (list key strengths found in the resume)
-        Weaknesses: (list areas for improvement)
-        Missing Keywords: (list critical keywords for a {target_role} role missing from this resume)
-        Extracted Skills: (list ALL technical skills actually found in the resume text, comma-separated)
-        Improvement Suggestions: (provide actionable tips)
-        Optimized Example Bullet Points: (provide 1-2 rewritten bullet points)
+        Strengths: (Briefly list 3-5 key technical strengths found in the resume)
+        Weaknesses: (Briefly list 2-3 specific areas where the resume could be improved)
+        Missing Keywords: (List 5-8 critical technical keywords for a {target_role} role missing from this resume, comma-separated)
+        Extracted Skills: (List ALL technical skills actually found in the resume text, comma-separated)
+        Improvement Suggestions: (Provide 3 actionable tips to improve this specific resume)
+        Optimized Example Bullet Points: (Rewrite 1-2 existing points from the resume to be more impact-oriented)
 
         Resume Text:
         {text[:4000]}
