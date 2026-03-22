@@ -52,8 +52,17 @@ public class StudentController {
     public ResponseEntity<org.springframework.core.io.Resource> getProfilePicture(@PathVariable String filename) throws IOException {
         Path filePath = Paths.get("uploads/profiles/").resolve(filename);
         org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(filePath.toUri());
+        
+        if (!resource.exists() || !resource.isReadable()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = "image/jpeg";
+        if (filename.toLowerCase().endsWith(".png")) contentType = "image/png";
+        else if (filename.toLowerCase().endsWith(".gif")) contentType = "image/gif";
+
         return ResponseEntity.ok()
-                .contentType(org.springframework.http.MediaType.IMAGE_JPEG)
+                .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
                 .body(resource);
     }
 

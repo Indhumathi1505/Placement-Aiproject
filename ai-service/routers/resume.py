@@ -48,6 +48,8 @@ ALL_KNOWN_SKILLS = [
     "microservices", "kafka", "rabbitmq", "activemq", "mqtt",
     "jwt", "oauth", "oops", "object oriented programming", "design patterns", "agile", "scrum", "kanban",
     "snowflake", "apache spark", "hadoop", "bi", "data engineering", "cypress", "playwright", "postman",
+    "docker compose", "jenkins pipeline", "nginx", "apache", "unity3d", "vector icons", "figma", "canva",
+    "powerpoint", "agile scrum", "soft skills", "problem solving", "leadership", "teamwork", "adaptability",
 ]
 
 ATS_KEYWORDS = [
@@ -225,15 +227,22 @@ def analyze_resume(req: ResumeAnalysisRequest):
 
     # 4. Dynamic Fallback on AI Failure
     if not ats_results:
-        summary = f"Strong technical profile focusing on {', '.join(extracted_skills[:4])}."
-        missing_str = ", ".join(heuristic_missing[:5])
+        summary = f"Strong technical profile focusing on {', '.join(all_skills[:4])}. "
+        if prob > 0.75:
+            summary += "Your profile shows high readiness for placement."
+        elif prob > 0.5:
+            summary += "You have a solid foundation but can improve specific matches."
+        else:
+            summary += "Strategic focus on the missing keywords below will significantly boost your chances."
+            
+        missing_str = ", ".join([m.title() for m in final_missing[:5]])
         ats_results = {
             "ats_score": ats_score,
             "strengths": summary,
             "weaknesses": f"Could enhance profile by adding expertise in: {missing_str}",
             "missing_keywords": missing_str,
-            "suggestions": f"Focus on mastering {missing_str} to improve ATS compatibility.",
-            "optimized_bullets": "Example: Engineered a scalable backend using your top skills; improved efficiency by 20%."
+            "suggestions": f"Focus on mastering {missing_str} to improve ATS compatibility for {target_role} roles.",
+            "optimized_bullets": f"Example: Engineered a scalable {target_role} component using {' and '.join(all_skills[:2])}."
         }
 
     # Final result assembly

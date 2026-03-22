@@ -92,11 +92,14 @@ td{padding:12px 16px;font-size:13px;vertical-align:middle}
 </head>
 <body>
 <aside class="sidebar">
-  <div class="sidebar-logo"><span class="logo-dot"></span>PlaceIQ <span style="font-size:10px;background:rgba(255,107,107,0.15);color:#FF6B6B;border-radius:4px;padding:2px 6px;margin-left:4px;font-family:var(--font-body);font-weight:600">ADMIN</span></div>
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="PlaceIQ Logo" style="height:32px;width:auto">
+    <span style="font-size:10px;background:rgba(255,107,107,0.15);color:#FF6B6B;border-radius:4px;padding:2px 6px;margin-left:4px;font-family:var(--font-body);font-weight:600">ADMIN</span>
+  </div>
   <nav class="sidebar-nav">
     <div class="nav-section">Admin</div>
     <a href="admin.html" class="nav-item active"><span class="nav-icon">📊</span>Dashboard</a>
-    <a href="login.html" class="nav-item"><span class="nav-icon">🚪</span>Sign Out</a>
+    <a href="login.html" class="nav-item" onclick="event.preventDefault(); signOut();"><span class="nav-icon">🚪</span>Sign Out</a>
   </nav>
   <div class="sidebar-user">
     <div class="user-card">

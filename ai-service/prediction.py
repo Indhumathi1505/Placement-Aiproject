@@ -27,14 +27,20 @@ ROLE_SKILLS: Dict[str, List[str]] = {
 
 # Company-specific bonus skills (presence boosts that company's probability)
 COMPANY_BONUS_SKILLS: Dict[str, List[str]] = {
-    "TCS":       ["java", "sql", "communication"],
-    "Infosys":   ["java", "python", "agile"],
-    "Wipro":     ["java", "testing", "sql"],
-    "Amazon":    ["dsa", "system design", "java", "python"],
-    "Google":    ["dsa", "system design", "algorithms", "python"],
-    "Microsoft": ["dsa", "system design", "c#", "azure"],
-    "HCL":       ["java", "spring boot", "sql"],
-    "Cognizant": ["java", "sql", "communication"],
+    "TCS":       ["java", "sql", "communication", "python"],
+    "Infosys":   ["java", "python", "agile", ".net"],
+    "Wipro":     ["java", "testing", "sql", "cloud"],
+    "Amazon":    ["dsa", "system design", "java", "python", "aws"],
+    "Google":    ["dsa", "system design", "algorithms", "python", "go"],
+    "Microsoft": ["dsa", "system design", "c#", "azure", "c++"],
+    "HCL":       ["java", "spring boot", "sql", "linux"],
+    "Cognizant": ["java", "sql", "communication", "react"],
+    "Zoho":      ["c", "java", "dsa", "oops", "problem solving"],
+    "Freshworks": ["ruby on rails", "javascript", "java", "rest api"],
+    "Capgemini":  ["java", "sql", "cloud", "javascript"],
+    "Accenture":  ["cloud", "sap", "java", "python", "agile"],
+    "Deloitte":   ["data analysis", "sql", "tableau", "power bi"],
+    "Tech Mahindra": ["networking", "java", "sql", "cloud"],
 }
 
 
