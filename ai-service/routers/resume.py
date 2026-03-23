@@ -227,7 +227,10 @@ def analyze_resume(req: ResumeAnalysisRequest):
 
     # 4. Dynamic Fallback on AI Failure
     if not ats_results:
-        summary = f"Strong technical profile focusing on {', '.join(all_skills[:4])}. "
+        fallback_skills = [s.title() for s in extracted_skills]
+        fallback_missing = [m.title() for m in heuristic_missing]
+        
+        summary = f"Strong technical profile focusing on {', '.join(fallback_skills[:4])}. "
         if prob > 0.75:
             summary += "Your profile shows high readiness for placement."
         elif prob > 0.5:
@@ -235,14 +238,15 @@ def analyze_resume(req: ResumeAnalysisRequest):
         else:
             summary += "Strategic focus on the missing keywords below will significantly boost your chances."
             
-        missing_str = ", ".join([m.title() for m in final_missing[:5]])
+        missing_str = ", ".join(fallback_missing[:5])
         ats_results = {
             "ats_score": ats_score,
             "strengths": summary,
             "weaknesses": f"Could enhance profile by adding expertise in: {missing_str}",
             "missing_keywords": missing_str,
             "suggestions": f"Focus on mastering {missing_str} to improve ATS compatibility for {target_role} roles.",
-            "optimized_bullets": f"Example: Engineered a scalable {target_role} component using {' and '.join(all_skills[:2])}."
+            "optimized_bullets": f"Example: Engineered a scalable {target_role} component using {' and '.join(fallback_skills[:2])}.",
+            "extracted_skills": fallback_skills
         }
 
     # Final result assembly

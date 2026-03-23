@@ -624,7 +624,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
         // Fallback or empty radar
         new Chart(radarCtx, {
             type: 'radar',
-            data: { labels: ['No Resume Data'], datasets: [{ data: [0], borderColor: '#7C6FF7' }] }
+            data: { labels: ['No Resume Data'], datasets: [{ label: 'Skills', data: [0], borderColor: '#7C6FF7' }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { r: { min: 0, max: 100, ticks: { display: false } } } }
         });
         document.querySelector('.skill-list').innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted)">Please upload your resume to see skill strengths.</div>`;
         return;
@@ -636,7 +637,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 
     new Chart(radarCtx, {
       type: 'radar',
-      data: { labels: radarLabels, datasets: [{ data: radarValues, borderColor: '#7C6FF7', backgroundColor: 'rgba(124,111,247,0.15)' }] },
+      data: { labels: radarLabels, datasets: [{ label: 'Skills', data: radarValues, borderColor: '#7C6FF7', backgroundColor: 'rgba(124,111,247,0.15)' }] },
       options: { responsive: true, plugins: { legend: { display: false } }, scales: { r: { min: 0, max: 100, ticks: { display: false } } } }
     });
 
