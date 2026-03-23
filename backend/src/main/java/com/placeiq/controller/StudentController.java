@@ -79,6 +79,11 @@ public class StudentController {
         return ResponseEntity.ok(studentService.uploadAndAnalyzeResume(id, file));
     }
 
+    @GetMapping("/{id}/resume/download")
+    public ResponseEntity<org.springframework.core.io.Resource> downloadResume(@PathVariable String id) {
+        return studentService.downloadResume(id);
+    }
+
     // ─── PREDICTION ───────────────────────────────────────────────────────────
 
     @GetMapping("/{id}/prediction")

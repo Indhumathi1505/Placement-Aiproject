@@ -11,4 +11,10 @@ window.PLACE_IQ_AI_API_URL = isLocal
     ? 'http://localhost:8001' 
     : 'https://placeiq-ai-service.onrender.com';
 
+window.signOut = function() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+};
+
 

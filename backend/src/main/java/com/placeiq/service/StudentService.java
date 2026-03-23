@@ -173,4 +173,24 @@ public class StudentService {
         student.setPlaced(placed);
         return studentRepository.save(student);
     }
+
+    public org.springframework.http.ResponseEntity<org.springframework.core.io.Resource> downloadResume(String studentId) {
+        Student student = getStudentById(studentId);
+        if (student.getResumeFilePath() == null) {
+            return org.springframework.http.ResponseEntity.notFound().build();
+        }
+        try {
+            java.nio.file.Path filePath = java.nio.file.Paths.get(student.getResumeFilePath());
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(filePath.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                return org.springframework.http.ResponseEntity.notFound().build();
+            }
+            return org.springframework.http.ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"resume_" + studentId + ".pdf\"")
+                    .body(resource);
+        } catch (java.net.MalformedURLException e) {
+            return org.springframework.http.ResponseEntity.internalServerError().build();
+        }
+    }
 }
