@@ -113,22 +113,39 @@ def score_resume(extracted_skills: List[str], target_role: str, text_length: int
     return min(int(skill_match * 65) + length_bonus + 15, 100)
 
 def call_huggingface_model(model_id: str, prompt: str, token: str) -> Optional[dict]:
-    headers = {"Authorization": f"Bearer {token}"}
-    payload = {
-        "inputs": prompt,
-        "parameters": {"max_new_tokens": 1024, "temperature": 0.2, "return_full_text": False}
-    }
-    endpoint = f"{HF_INFERENCE_URL}/{model_id}"
-    resp = requests.post(endpoint, headers=headers, json=payload, timeout=45)
-    resp.raise_for_status()
-    output = resp.json()
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     
-    # Handle both list and dict response formats from HF Inference API
-    if isinstance(output, list) and output:
-        text = output[0].get('generated_text', '')
-    else:
-        text = output.get('generated_text', '')
+    # Try the new Messages API first (OpenAI-compatible) supported by latest HF models
+    try:
+        chat_endpoint = f"{HF_INFERENCE_URL}/{model_id}/v1/chat/completions"
+        chat_payload = {
+            "model": model_id,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 1024,
+            "temperature": 0.2
+        }
+        resp = requests.post(chat_endpoint, headers=headers, json=chat_payload, timeout=45)
+        resp.raise_for_status()
+        output = resp.json()
+        text = output.get("choices", [{}])[0].get("message", {}).get("content", "")
+    except requests.exceptions.HTTPError as e:
+        # Fallback to the classic text-generation endpoint
+        logger.warning(f"V1 Chat API failed for {model_id}, trying legacy endpoint... ({e})")
+        legacy_endpoint = f"{HF_INFERENCE_URL}/{model_id}"
+        legacy_payload = {
+            "inputs": prompt,
+            "parameters": {"max_new_tokens": 1024, "temperature": 0.2, "return_full_text": False}
+        }
+        resp = requests.post(legacy_endpoint, headers=headers, json=legacy_payload, timeout=45)
+        resp.raise_for_status()
+        output = resp.json()
         
+        # Handle both list and dict response formats from HF Inference API
+        if isinstance(output, list) and output:
+            text = output[0].get('generated_text', '')
+        else:
+            text = output.get('generated_text', '')
+            
     if not text:
         return None
         
