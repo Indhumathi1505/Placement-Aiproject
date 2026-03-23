@@ -18,9 +18,10 @@ router = APIRouter()
 
 # ─── CONFIGURATION ───────────────────────────────────────────────────────────
 HF_MODELS = [
-    "mistralai/Mistral-7B-Instruct-v0.2",
-    "HuggingFaceH4/zephyr-7b-beta",
-    "meta-llama/Meta-Llama-3-8B-Instruct"
+    "Qwen/Qwen2.5-7B-Instruct",
+    "meta-llama/Llama-3.2-3B-Instruct",
+    "mistralai/Mistral-Nemo-Instruct-2407",
+    "google/gemma-2-2b-it"
 ]
 HF_INFERENCE_URL = "https://api-inference.huggingface.co/models"
 
