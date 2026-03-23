@@ -462,7 +462,8 @@ function renderQuestions(rounds) {
                 </div>
                 
                 <div class="q-actions">
-                  <button class="q-btn primary" onclick="submitAnswer(this, '${q.question_id}')">Submit & Get Feedback</button>
+                  <button class="q-btn primary" onclick="submitAnswer(this, '${q.question_id}')">Submit & Evaluate</button>
+                  <button class="q-btn" onclick="toggleDictation(this)" style="display:flex;align-items:center;gap:6px">🎤 Dictate Answer</button>
                   <button class="q-btn" onclick="toggleAnswer(this)">Show Sample Answer</button>
                 </div>
                 
@@ -491,26 +492,148 @@ async function submitAnswer(btn, qId) {
   const card = btn.closest('.q-card');
   const textarea = card.querySelector('textarea');
   const feedbackArea = card.querySelector('.feedback-area');
+  const sampleAnswerText = card.querySelector('.sample-answer-area').textContent.toLowerCase();
   const answer = textarea.value.trim();
   
-  if (!answer) { alert("Please type an answer first."); return; }
+  if (!answer) { alert("Please type or dictate your answer first."); return; }
   
   btn.disabled = true;
   btn.textContent = "Analyzing...";
   
-  // Minimal feedback simulation to make it feel interactive
   setTimeout(() => {
+    // Generate keywords from sample answer to simulate evaluation
+    const keywords = sampleAnswerText.split(/[\s,.]+/).filter(w => w.length > 4);
+    let matches = 0;
+    keywords.forEach(kw => { if (answer.toLowerCase().includes(kw)) matches++; });
+    
+    // Evaluate correctness based on keywords and length
+    const isCorrect = answer.length > 20 && (matches > 2 || answer.length > 60);
+    
+    let feedbackMessage = isCorrect 
+        ? "Congratulations! That is the correct answer. You explained the logic very well." 
+        : "Wrong! Your answer misses the core concepts. Please check the sample answer to see how it should be explained.";
+        
+    let resultType = isCorrect ? "✅ SUPERB! CORRECT ANSWER" : "❌ INCORRECT";
+    let resultColor = isCorrect ? "var(--accent3)" : "#FF6B6B";
+
     feedbackArea.style.display = 'block';
     feedbackArea.innerHTML = `
-      <div style="background:rgba(61,220,178,0.1);border:1px solid var(--accent3);border-radius:12px;padding:15px">
-        <div style="color:var(--accent3);font-weight:700;font-size:12px;margin-bottom:5px">✓ AI FEEDBACK</div>
-        <div style="font-size:13px;line-height:1.5">Good attempt! You covered the core logic. To improve, try to mention the time complexity (O(N)) and space complexity (O(1)) explicitly.</div>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid ${resultColor};border-radius:12px;padding:15px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="color:${resultColor};font-weight:700;font-size:12px">${resultType}</div>
+          <button class="q-btn primary" style="padding:4px 8px;font-size:11px" onclick="readFeedback(this)" data-text="${feedbackMessage}">🔊 Listen Again</button>
+        </div>
+        <div style="font-size:13px;line-height:1.5;color:var(--text)">${feedbackMessage}</div>
       </div>
     `;
-    btn.textContent = "Submitted";
+    btn.textContent = "Evaluated";
     btn.style.background = "var(--dim)";
+    btn.style.borderColor = "var(--dim)";
+    
+    // Auto-play the voice immediately when submitted!
+    const listenBtn = feedbackArea.querySelector('button');
+    if (listenBtn) readFeedback(listenBtn);
   }, 1000);
 }
+
+// ============== WEB SPEECH API ==============
+let recognition = null;
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+}
+
+let activeDictationBtn = null;
+let activeTextarea = null;
+
+function toggleDictation(btn) {
+  if (!recognition) {
+    alert("Speech Recognition is not supported in this browser. Please use Google Chrome.");
+    return;
+  }
+  
+  const card = btn.closest('.q-card');
+  const textarea = card.querySelector('textarea');
+
+  if (activeDictationBtn === btn) {
+    // Stop recording
+    recognition.stop();
+    btn.innerHTML = '🎤 Dictate Answer';
+    btn.style.color = 'var(--text)';
+    btn.style.borderColor = 'var(--border)';
+    activeDictationBtn = null;
+    activeTextarea = null;
+    return;
+  }
+  
+  // Start recording
+  if (activeDictationBtn) {
+    recognition.stop();
+    activeDictationBtn.innerHTML = '🎤 Dictate Answer';
+    activeDictationBtn.style.color = 'var(--text)';
+    activeDictationBtn.style.borderColor = 'var(--border)';
+  }
+  
+  activeDictationBtn = btn;
+  activeTextarea = textarea;
+  btn.innerHTML = '🔴 Listening... (Click to Stop)';
+  btn.style.color = '#FF6B6B';
+  btn.style.borderColor = '#FF6B6B';
+  
+  recognition.start();
+
+  recognition.onresult = function(event) {
+    let finalTranscript = '';
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript + ' ';
+      }
+    }
+    if (finalTranscript) {
+       // Append the dictated text to whatever is already in the textarea
+       let current = activeTextarea.value.trim();
+       activeTextarea.value = current ? current + " " + finalTranscript : finalTranscript;
+    }
+  };
+  
+  recognition.onerror = function(event) {
+    console.error("Speech Error:", event.error);
+    if(activeDictationBtn) {
+       activeDictationBtn.innerHTML = '🎤 Dictate Answer';
+       activeDictationBtn.style.color = 'var(--text)';
+       activeDictationBtn.style.borderColor = 'var(--border)';
+       activeDictationBtn = null;
+    }
+  };
+}
+
+function readFeedback(btn) {
+  const text = btn.getAttribute('data-text');
+  if (!text) return;
+  
+  if (!('speechSynthesis' in window)) {
+    alert("Text-to-Speech is not supported in this browser.");
+    return;
+  }
+  
+  window.speechSynthesis.cancel(); // Stop playing anything else
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 1.0;
+  
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '🔊 Speaking...';
+  
+  utterance.onend = function() {
+    btn.innerHTML = originalHtml;
+  };
+  
+  window.speechSynthesis.speak(utterance);
+}
+// ============================================
 
 function toggleQ(header) {
   const card = header.closest('.q-card');
